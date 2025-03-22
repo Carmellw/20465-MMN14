@@ -7,5 +7,7 @@ add_executable(MMN14 assembler.c
         macro_expander.c
         macro_expander.h
         consts.h
-        structs.h
+        macro.h
+        macro_linked_list.c
+        marco_linked_list.h
 )

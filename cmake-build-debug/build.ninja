@@ -61,6 +61,12 @@ build CMakeFiles/MMN14.dir/macro_expander.c.o: C_COMPILER__MMN14_unscanned_Debug
   OBJECT_DIR = CMakeFiles/MMN14.dir
   OBJECT_FILE_DIR = CMakeFiles/MMN14.dir
 
+build CMakeFiles/MMN14.dir/macro_linked_list.c.o: C_COMPILER__MMN14_unscanned_Debug /Users/carmellwasserman/Documents/לימודים/מעבדה$ בתכנות$ מערכות/MMN14/macro_linked_list.c || cmake_object_order_depends_target_MMN14
+  DEP_FILE = CMakeFiles/MMN14.dir/macro_linked_list.c.o.d
+  FLAGS = -g -std=gnu90 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk -fcolor-diagnostics
+  OBJECT_DIR = CMakeFiles/MMN14.dir
+  OBJECT_FILE_DIR = CMakeFiles/MMN14.dir
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target MMN14
@@ -69,7 +75,7 @@ build CMakeFiles/MMN14.dir/macro_expander.c.o: C_COMPILER__MMN14_unscanned_Debug
 #############################################
 # Link the executable MMN14
 
-build MMN14: C_EXECUTABLE_LINKER__MMN14_Debug CMakeFiles/MMN14.dir/assembler.c.o CMakeFiles/MMN14.dir/macro_expander.c.o
+build MMN14: C_EXECUTABLE_LINKER__MMN14_Debug CMakeFiles/MMN14.dir/assembler.c.o CMakeFiles/MMN14.dir/macro_expander.c.o CMakeFiles/MMN14.dir/macro_linked_list.c.o
   FLAGS = -g -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk
   OBJECT_DIR = CMakeFiles/MMN14.dir
   POST_BUILD = :
