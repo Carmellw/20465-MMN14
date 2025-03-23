@@ -6,7 +6,7 @@
 
 #define MAX_LINE_LEN 81
 
-#define MACRO_START = "mcro"
-#define MACRO_END = "endmcro"
+#define MACRO_START "mcro"
+#define MACRO_END "endmcro"
 
 #endif // CONSTS_H
