@@ -10,4 +10,6 @@ add_executable(MMN14 assembler.c
         macro.h
         macro_linked_list.c
         marco_linked_list.h
+        first_pass.c
+        first_pass.h
 )
