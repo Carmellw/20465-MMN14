@@ -6,7 +6,7 @@
 #include "macro_expander.h"
 #include "macro.h"
 
-void expand_macros(const char *file_path);
+void expand_macros(const char *file_path, const char **result_file_path);
 
 void separate_macros_from_file(FILE* file_to_read, FILE* file_to_write, struct macro **macros);
 
