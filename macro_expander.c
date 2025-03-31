@@ -10,7 +10,7 @@
 
 void expand_macros(const char *file_path) {
     FILE* fp = fopen(file_path, "r");
-    FILE* fp2 = fopen("/Users/carmellwasserman/Desktop/example2.txt", "w");
+    FILE* fp2 = fopen("/Users/carmellwasserman/Desktop/example2.txt", "w"); // TODO: change this to temps or something
     struct macro *first_macro = NULL;
 
     separate_macros_from_file(fp, fp2, &first_macro);
