@@ -9,8 +9,8 @@
 #include "marco_linked_list.h"
 
 void expand_macros(const char *file_path, const char **result_file_path) {
-    FILE* fp = fopen(file_path, "r");
-    FILE* fp2 = fopen("/Users/carmellwasserman/Desktop/example2.txt", "w"); // TODO: change this to temps or something
+    FILE *fp = fopen(file_path, "r"); // TODO: change those names
+    FILE *fp2 = fopen("/Users/carmellwasserman/Desktop/example2.txt", "w"); // TODO: change this to temps or something
     struct macro *first_macro = NULL;
 
 
