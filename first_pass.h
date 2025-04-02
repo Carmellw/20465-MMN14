@@ -3,6 +3,6 @@
 
 void handle_line(char* line, FILE* file_to_write);
 
-int contain_label(char* line);
+char *get_label_if_exist(char* line);
 
 #endif //FIRST_PASS_H

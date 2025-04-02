@@ -20,34 +20,36 @@ void first_pass_file(char* file_path) {
 }
 
 void handle_line(char* line, FILE* file_to_write) {
+    const char *label = NULL;
     if (line[0] == '\0' || line[0] == '\n' || line[0] == ';') {
         return;
     }
 
-    if (contain_label(line)) {
+    label = get_label_if_exist(line);
+    if (label != NULL) {
+
     }
+
 
 }
 
-int contain_label(char* line) {
-    const char *label = strtok(line, ":");
+char *get_label_if_exist(char* line) {
+    char *label = strtok(line, ":");
     int i = 0;
 
-    while (strlen(label) > i) {
+    while (strlen(label) > 0) {
         if (!isspace(label[i])) {
             break;
         }
+        label++;
     }
 
     while (strlen(label) > i) {
         if (!isalnum(label[i])) {
-            return FALSE;
+            return NULL;
         }
+        i++;
     }
 
-    return TRUE;
-}
-
-char *get_label(char* line) {
-
+    return label;
 }
