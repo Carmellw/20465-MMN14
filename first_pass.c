@@ -31,24 +31,34 @@ void first_pass_file(const char* file_path) {
 void handle_line(const char* line, FILE* file_to_write, struct label **current_label, int *ic, int *dc) {
     const char label[MAX_LABEL_LEN];
     enum label_type label_type;
-
+    int is_label_exist;
     if (line[0] == '\0' || line[0] == '\n' || line[0] == ';') {
         return;
     }
 
     get_label_type(line, &label_type);
 
-    get_label_name(line, label_type, label);
+    is_label_exist = get_label_name(line, label_type, label);
 
     switch (label_type) {
         case CODE_TYPE:
-            add_label(label, label_type, *ic, current_label);
+            if (is_label_exist) {
+                add_label(label, label_type, *ic, current_label);
+                *current_label = (*current_label)->next_label;
+            }
             update_ic(line, ic);
+            break;
         case DATA_TYPE:
-            add_label(label, label_type, *dc, current_label);
+            if (is_label_exist) {
+                add_label(label, label_type, *dc, current_label);
+                *current_label = (*current_label)->next_label;
+            }
             update_dc(line, dc);
+            break;
         case EXTERN_TYPE:
-            add_label(label, label_type, 0, current_label);
+            if (is_label_exist) {
+                add_label(label, label_type, 0, current_label);
+            }
             break;
         case ENTRY_TYPE:
             // entry list
@@ -69,7 +79,7 @@ int get_label_name(const char* line, const enum label_type type, char* label_nam
             if (strchr(line, ':') == NULL) {
                 return FALSE;
             }
-            strcpy(temp_line, line);
+
             temp_label = strtok(temp_line, ":");
             break;
         case EXTERN_TYPE:
@@ -109,32 +119,36 @@ int get_label_type(const char *line, enum label_type *type) {
 
     if (strchr(line, ':') != NULL) {
         word = strtok(temp_line, ":");
-        word = strtok(NULL, " ");
+        word = strtok(NULL, " \n");
     }
     else {
-        word = strtok(temp_line, " ");
+        word = strtok(temp_line, " \n");
     }
 
     if (word == NULL) {
         word = strtok(NULL, " ");
     }
 
-    while (strlen(word) > 0) {
+    while (word != NULL && strlen(word) > 0) {
         if (!isspace(*word)) {
             break;
         }
         word++;
     }
 
-    if (strncmp(word, ".data", 5) == 0 || strncmp(word, ".string", 7) == 0) {
-        *type = DATA_TYPE;
-    } else if (strncmp(word, ".extern", 7) == 0) {
-        *type = EXTERN_TYPE;
-    } else if (strncmp(word, ".entry", 6) == 0) {
-        *type = ENTRY_TYPE;
-    } else if (is_instruction(word)) {
+    if (word == NULL || is_instruction(word)) {
         *type = CODE_TYPE;
-    } else {
+    }
+    else if (strncmp(word, ".data", 5) == 0 || strncmp(word, ".string", 7) == 0) {
+        *type = DATA_TYPE;
+    }
+    else if (strncmp(word, ".extern", 7) == 0) {
+        *type = EXTERN_TYPE;
+    }
+    else if (strncmp(word, ".entry", 6) == 0) {
+        *type = ENTRY_TYPE;
+    }
+    else {
         return FALSE;
     }
 
@@ -145,7 +159,7 @@ int is_instruction(const char *word) {
     const char *instructions[] = {"mov", "cmp", "add", "sub","not", "clr","lea", "inc","dec", "jmp", "bne","red","prn", "jsr" , "rts", "stop"};
     int i;
 
-    for (i = 0; i < sizeof(instructions)/3 ; i++) {
+    for (i = 0; i < sizeof(instructions)/sizeof(instructions[0]) ; i++) {
         if (strcmp(word, instructions[i]) == 0) {
             return TRUE;
         }
