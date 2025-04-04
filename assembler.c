@@ -8,7 +8,7 @@
 
 int main(int argc, char** argv) {
     char *result;
-    expand_macros("/Users/carmellwasserman/Desktop/example1.as", &result);
+    expand_macros("/Users/carmellwasserman/Desktop/test2.as", &result);
     printf("%s\n", result);
 
     first_pass_file(result);
