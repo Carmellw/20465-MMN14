@@ -104,17 +104,19 @@ int get_label_name(const char* line, const enum label_type type, char* label_nam
 int get_label_type(const char *line, enum label_type *type) {
     char temp_line[MAX_LINE_LEN];
     char *word;
-    int i = 0;
 
     strcpy(temp_line, line);
 
-    word = strtok(temp_line, ":");
     if (strchr(line, ':') != NULL) {
+        word = strtok(temp_line, ":");
         word = strtok(NULL, " ");
+    }
+    else {
+        word = strtok(temp_line, " ");
     }
 
     if (word == NULL) {
-        return FALSE;
+        word = strtok(NULL, " ");
     }
 
     while (strlen(word) > 0) {
