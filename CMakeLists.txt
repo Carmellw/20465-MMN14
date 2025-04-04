@@ -16,4 +16,6 @@ add_executable(MMN14 assembler.c
         label_linked_list.h
         label_linked_list.c
         entry.h
+        entry_linked_list.h
+        entry_linked_list.c
 )

@@ -2,10 +2,11 @@
 #define FIRST_PASS_H
 
 #include "label.h"
+#include "entry.h"
 
 void first_pass_file(const char* file_path);
 
-void handle_line(const char* line, FILE* file_to_write, struct label **current_label, int *ic, int *dc);
+void handle_line(const char* line, FILE* file_to_write, struct label **current_label, struct entry **current_entry, int *ic, int *dc);
 
 int get_label_name(const char* line, const enum label_type type, char* label_name);
 
