@@ -24,6 +24,9 @@ void expand_macros(const char *file_path, const char **result_file_path) {
 
     replace_macros(fp, fp2, first_macro);
 
+    fclose(fp);
+    fclose(fp2);
+
     *result_file_path = malloc(strlen("/Users/carmellwasserman/Desktop/example3.txt") + 1);
     *result_file_path = "/Users/carmellwasserman/Desktop/example3.txt";
 }

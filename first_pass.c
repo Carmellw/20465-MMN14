@@ -1,13 +1,12 @@
 #include <stdio.h>
+#include <ctype.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "consts.h"
 #include "first_pass.h"
 #include "label_linked_list.h"
 #include "label.h"
-
-#include <ctype.h>
-#include <stdlib.h>
-#include <string.h>
 
 void first_pass_file(const char* file_path) {
     FILE *fp = fopen(file_path, "r");
@@ -19,7 +18,7 @@ void first_pass_file(const char* file_path) {
     int dc = 0;
 
     while (fgets(line, MAX_LINE_LEN, fp)) {
-        handle_line(line, fp2, &current_label);
+        handle_line(line, fp2, &current_label, &ic, &dc);
         if (first_label == NULL) {
             first_label = current_label;
         }
@@ -44,9 +43,10 @@ void handle_line(const char* line, FILE* file_to_write, struct label **current_l
     switch (label_type) {
         case CODE_TYPE:
             add_label(label, label_type, *ic, current_label);
+            update_ic(line, ic);
         case DATA_TYPE:
             add_label(label, label_type, *dc, current_label);
-            handle_data_count(line, dc);
+            update_dc(line, dc);
         case EXTERN_TYPE:
             add_label(label, label_type, 0, current_label);
             break;
@@ -104,6 +104,7 @@ int get_label_name(const char* line, const enum label_type type, char* label_nam
 int get_label_type(const char *line, enum label_type *type) {
     char temp_line[MAX_LINE_LEN];
     char *word;
+    int i = 0;
 
     strcpy(temp_line, line);
 
@@ -151,7 +152,7 @@ int is_instruction(const char *word) {
     return FALSE;
 }
 
-void handle_data_count(const char *line, int *dc) {
+void update_dc(const char *line, int *dc) {
     char temp_line[MAX_LINE_LEN];
     char *word;
 
@@ -172,6 +173,37 @@ void handle_data_count(const char *line, int *dc) {
         }
         (*dc)++;
     }
+}
+
+void update_ic(const char *line, int *ic) {
+    char temp_line[MAX_LINE_LEN];
+    char *word;
+    int count = 0;
+    int is_register_found = FALSE;
+
+    strcpy(temp_line, line);
+
+    if (strchr(temp_line, ':')) {
+        strtok(temp_line, ":");
+        word = strtok(NULL, " ");
+    }
+    else {
+        word = strtok(temp_line, " ");
+    }
+
+    //word = strtok(NULL, " ,");
+    while (word != NULL) {
+        count++;
+        if (word[0] == '@') {
+            if (is_register_found) {
+                count--;
+            }
+            is_register_found = TRUE;
+        }
+        word = strtok(NULL, " ,");
+    }
+
+    *ic += ++count;
 }
 
 
