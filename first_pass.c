@@ -10,6 +10,8 @@ void first_pass_file(const char* file_path) {
     FILE *fp = fopen(file_path, "r");
     FILE *fp2 = fopen("/Users/carmellwasserman/Desktop/example4.txt", "w");
     char line[MAX_LINE_LEN];
+    int ic = 100;
+    int dc = 100;
 
     while (fgets(line, MAX_LINE_LEN, fp)) {
         handle_line(line, fp2);
