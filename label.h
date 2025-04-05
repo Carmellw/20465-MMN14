@@ -2,16 +2,16 @@
 #define LABEL_H
 #include "consts.h"
 
-enum label_type{
-    CODE_TYPE,
-    DATA_TYPE,
-    EXTERN_TYPE,
-    ENTRY_TYPE
+enum line_type{
+    CODE,
+    DATA,
+    EXTERN,
+    ENTRY
 };
 
 struct label{
     char name[MAX_LABEL_LEN];
-    enum label_type type;
+    enum line_type type;
     int address;
     struct label *next_label;
 };

@@ -7,6 +7,7 @@
 #include "consts.h"
 #include "macro.h"
 #include "marco_linked_list.h"
+#include "line_utils.h"
 
 void expand_macros(const char *file_path, const char **result_file_path) {
     FILE *fp = fopen(file_path, "r"); // TODO: change those names
@@ -57,33 +58,35 @@ void replace_macros(FILE* file_to_read, FILE* file_to_write, struct macro *macro
 
 void separate_macros_from_file(FILE* file_to_read, FILE* file_to_write, struct macro **macros) {
     char line[MAX_LINE_LEN];
+    char *trimmed_line;
     int is_in_macro = FALSE;
     struct macro *first_macro = NULL;
     struct macro *current_macro = NULL;
     struct line *current_line = NULL;
 
-      while (fgets(line, MAX_LINE_LEN, file_to_read)) {
-        if (FALSE == is_in_macro && strncmp(line, MACRO_START, strlen(MACRO_START)) == 0) {
+    while (fgets(line, MAX_LINE_LEN, file_to_read)) {
+        trimmed_line = trim_whitespaces_from_start(line);
+        if (FALSE == is_in_macro && strncmp(trimmed_line, MACRO_START, strlen(MACRO_START)) == 0) {
             is_in_macro = TRUE;
-            add_macro(get_macro_name(line), &current_macro);
+            add_macro(get_macro_name(trimmed_line), &current_macro);
             if (first_macro == NULL) {
                 first_macro = current_macro;
             }
         }
-        else if (TRUE == is_in_macro && strncmp(line, MACRO_END, strlen(MACRO_END)) == 0) {
+        else if (TRUE == is_in_macro && strncmp(trimmed_line, MACRO_END, strlen(MACRO_END)) == 0) {
             is_in_macro = FALSE;
         }
         else if (TRUE == is_in_macro) {
             if (current_macro->first_line == NULL) {
-                add_first_line_to_macro(line, &current_macro);
+                add_first_line_to_macro(trimmed_line, &current_macro);
                 current_line = current_macro->first_line;
             }
             else {
-                add_line(line, &current_line);
+            add_line(trimmed_line, &current_line);
             }
         }
         else {
-            fprintf(file_to_write, "%s", line);
+            fprintf(file_to_write, "%s", trimmed_line);
         }
     }
     *macros = first_macro;

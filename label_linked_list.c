@@ -4,7 +4,7 @@
 #include "label.h"
 #include "label_linked_list.h"
 
-void add_label(const char* name, const enum label_type type, const int address, struct label** last_label)
+void add_label(const char* name, const enum line_type type, const int address, struct label** last_label)
 {
     struct label *new_label = malloc(sizeof(struct label));
 

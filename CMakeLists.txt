@@ -18,4 +18,8 @@ add_executable(MMN14 assembler.c
         entry.h
         entry_linked_list.h
         entry_linked_list.c
+        second_pass.c
+        second_pass.h
+        line_utils.c
+        line_utils.h
 )
