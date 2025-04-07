@@ -10,7 +10,7 @@
 #include "entry_linked_list.h"
 #include "line_utils.h"
 
-void first_pass_file(const char* file_path) {
+void first_pass_file(const char* file_path, struct label* labels, struct entry* entries, int *ic, int *dc) {
     FILE *fp = fopen(file_path, "r");
     FILE *fp2 = fopen("/Users/carmellwasserman/Desktop/example4.txt", "w");
     char line[MAX_LINE_LEN];
@@ -18,11 +18,11 @@ void first_pass_file(const char* file_path) {
     struct label *current_label = NULL;
     struct entry *first_entry = NULL;
     struct entry *current_entry = NULL;
-    int ic = 100;
-    int dc = 0;
+    *ic = 100;
+    *dc = 0;
 
     while (fgets(line, MAX_LINE_LEN, fp)) {
-        handle_line(line, fp2, &current_label, &current_entry, &ic, &dc);
+        handle_line(line, fp2, &current_label, &current_entry, ic, dc);
         if (first_label == NULL) {
             first_label = current_label;
         }
@@ -30,6 +30,9 @@ void first_pass_file(const char* file_path) {
             first_entry = current_entry;
         }
     }
+
+    labels = first_label;
+    entries = first_entry;
 
     fclose(fp);
     fclose(fp2);
@@ -138,8 +141,4 @@ void update_ic(const char *line, int *ic) {
     }
 
     *ic += ++count;
-}
-
-int is_register(const char *str) {
-    return str[0] == 'r' && str[1] >= '0' && str[1] <= '7' && str[2] == '\0';
 }

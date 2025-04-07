@@ -4,6 +4,10 @@
 #include "consts.h"
 #include "line_utils.h"
 #include "status_codes.h"
+#include "second_pass.h"
+
+#include "first_pass.h"
+#include "intstruction.h"
 
 void second_pass_file(const char *file_path, struct label *labels, struct entry *entries, int ic, int dc) {
     FILE *fp = fopen(file_path, "r");
@@ -18,7 +22,7 @@ void second_pass_file(const char *file_path, struct label *labels, struct entry 
     dc = 0;
 
     while (fgets(line, MAX_LINE_LEN, fp)) {
-
+        handle_line2(line, fp, labels, entries, &ic, &dc);
     }
 
     fclose(fp);
@@ -37,22 +41,23 @@ void handle_line2(const char* line, FILE *file_to_write, struct label *labels, s
 
     switch (label_type) {
         case CODE:
-
+            handle_code_line(line, file_to_write, labels, ic);
         case ENTRY:
-
         case DATA:
         case EXTERN:
             break;
     }
 }
 
-void handle_code_line(const char* line, FILE *file_to_write, struct label *labels, int *ic) {
+enum status_code handle_code_line(const char* line, FILE *file_to_write, struct label *labels, int *ic) {
     char temp_line[MAX_LINE_LEN];
     char *word;
     char *instruction;
     char *operand1 = NULL;
     char *operand2 = NULL;
     int word_count = 0;
+    enum status_code status_code;
+    unsigned int command = 0;
 
     strcpy(temp_line, line);
 
@@ -64,14 +69,18 @@ void handle_code_line(const char* line, FILE *file_to_write, struct label *label
     }
 
     if (!is_instruction(instruction)) {
-        return; // should be error prob
+        return UNKNOWN_ERROR;
     }
 
     operand1 = strtok(NULL, ", \n");
     operand2 = strtok(NULL, ", \n");
 
+    status_code = convert_code_line_to_binary(instruction, operand1, operand2, &command);
+    if (status_code != SUCCESS) {
+        return status_code;
+    }
 
-    fprintf(file_to_write, "%d %s\n", *ic, instruction);
+    fprintf(file_to_write, "%d %06X\n", *ic, command);
 
     if (operand1 != NULL) {
         //int val = encode_operand(operand1, labels);
@@ -81,19 +90,76 @@ void handle_code_line(const char* line, FILE *file_to_write, struct label *label
             //fprintf(file_to_write, "%d %d\n", get_next_ic(), val);
         }
     }
+
+    return SUCCESS;
 }
 
-int convert_instruction_to_binary(char* instruction, char* operand1, char* operand2) {
+enum status_code convert_code_line_to_binary(const char* instruction, const char* src_operand, const char* dst_operand,
+    unsigned int *command){
 
+    enum status_code status_code;
+    struct instruction instruction_struct;
+    int src_reg = 0;
+    int dst_reg = 0;
+    enum addressing_type src_addressing_type = 0;
+    enum addressing_type dst_addressing_type = 0;
+
+    status_code = get_instruction(instruction, &instruction_struct);
+    if (status_code != SUCCESS) {
+        return status_code;
+    }
+
+    if (src_operand != NULL) {
+        src_addressing_type = get_addressing_type(src_operand);
+        if (src_addressing_type == REGISTER) {
+            src_reg = src_operand[1] - 48;
+        }
+    }
+
+    if (dst_operand != NULL) {
+        dst_addressing_type = get_addressing_type(dst_operand);
+        if (dst_addressing_type == REGISTER) {
+            dst_reg = (int)dst_operand[1];
+        }
+    }
+
+    *command = 0;
+    *command |= (instruction_struct.opcode & 0xF) << 18;
+    *command |= (src_addressing_type & 0x3) << 16;
+    *command |= (src_reg & 0xF) << 13;
+    *command |= (dst_addressing_type & 0x3) << 11;
+    *command |= (dst_reg & 0xF) << 7;
+    *command |= (instruction_struct.funct & 0xF) << 3;
+    *command |= 1 << 2;
+    *command |= 0 << 1;
+    *command |= 0;
+
+    return SUCCESS;
 }
 
-enum status_codes get_instruction(const char *command, struct instruction *instruction) {
+enum status_code get_instruction(const char *name, struct instruction *instruction) {
     int i;
     for (i = 0; i < 16; i++) {
-        if (strcmp(command, instructions[i].name) == 0) {
+        if (strcmp(name, instructions[i].name) == 0) {
             *instruction = instructions[i];
             return SUCCESS;
         }
     }
     return UNKNOWN_ERROR;
 }
+
+enum addressing_type get_addressing_type(const char *operand) {
+    if (operand[0] == '#') {
+        return IMMEDIATE;
+    }
+    if (operand[0] == '&') {
+        return IMMEDIATE;
+    }
+    if (is_register(operand)) {
+        return REGISTER;
+    }
+    return DIRECT;
+}
+
+
+

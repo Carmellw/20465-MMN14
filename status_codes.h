@@ -5,7 +5,7 @@
 #ifndef STATUS_CODES_H
 #define STATUS_CODES_H
 
-enum status_codes {
+enum status_code {
     SUCCESS,
     UNKNOWN_ERROR
 };

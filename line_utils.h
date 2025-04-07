@@ -15,4 +15,6 @@ int is_instruction(const char *word);
 
 char *trim_whitespaces_from_start(const char *line);
 
+int is_register(const char *str);
+
 #endif //LINE_UTILS_H

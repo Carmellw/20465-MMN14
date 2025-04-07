@@ -23,4 +23,6 @@ add_executable(MMN14 assembler.c
         line_utils.c
         line_utils.h
         status_codes.h
+        intstruction.h
+        intstruction.c
 )

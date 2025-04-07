@@ -4,6 +4,7 @@
 #include "consts.h"
 #include "label.h"
 #include "line_utils.h"
+#include "intstruction.h"
 
 int get_label_name_if_exist(const char* line, const enum line_type type, char* label_name) {
     char temp_line[MAX_LINE_LEN];
@@ -96,9 +97,9 @@ int get_line_type(const char *line, enum line_type *type) {
 }
 
 int is_instruction(const char *word) {
-    int i;
+    int i = instructions_count;
 
-    for (i = 0; i < sizeof(instructions)/sizeof(instructions[0]) ; i++) {
+    for (i = 0; i < sizeof(instructions_count) ; i++) {
         if (strcmp(word, instructions[i].name) == 0) {
             return TRUE;
         }
@@ -112,4 +113,8 @@ char *trim_whitespaces_from_start(const char *line) {
         line++;
     }
     return line;
+}
+
+int is_register(const char *str) {
+    return str[0] == 'r' && str[1] >= '0' && str[1] <= '7' && str[2] == '\0';
 }
