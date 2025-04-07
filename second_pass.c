@@ -3,6 +3,7 @@
 
 #include "consts.h"
 #include "line_utils.h"
+#include "status_codes.h"
 
 void second_pass_file(const char *file_path, struct label *labels, struct entry *entries, int ic, int dc) {
     FILE *fp = fopen(file_path, "r");
@@ -70,7 +71,7 @@ void handle_code_line(const char* line, FILE *file_to_write, struct label *label
     operand2 = strtok(NULL, ", \n");
 
 
-    fprintf(file_to_write, "%d %s\n", *ic, instruction); 
+    fprintf(file_to_write, "%d %s\n", *ic, instruction);
 
     if (operand1 != NULL) {
         //int val = encode_operand(operand1, labels);
@@ -82,16 +83,17 @@ void handle_code_line(const char* line, FILE *file_to_write, struct label *label
     }
 }
 
-int convert_instruction_to_int(char* instruction, char* operand1, char* operand2) {
+int convert_instruction_to_binary(char* instruction, char* operand1, char* operand2) {
 
 }
 
-int get_opcode(const char *command) {
+enum status_codes get_instruction(const char *command, struct instruction *instruction) {
     int i;
     for (i = 0; i < 16; i++) {
-        /*if (strcmp(command, instructions[i].name) == 0) {
-            return instructions[i].opcode;
-        }*/
+        if (strcmp(command, instructions[i].name) == 0) {
+            *instruction = instructions[i];
+            return SUCCESS;
+        }
     }
-    return -1;
+    return UNKNOWN_ERROR;
 }

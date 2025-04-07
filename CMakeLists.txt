@@ -22,4 +22,5 @@ add_executable(MMN14 assembler.c
         second_pass.h
         line_utils.c
         line_utils.h
+        status_codes.h
 )

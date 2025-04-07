@@ -96,11 +96,10 @@ int get_line_type(const char *line, enum line_type *type) {
 }
 
 int is_instruction(const char *word) {
-    const char *instructions[] = {"mov", "cmp", "add", "sub","not", "clr","lea", "inc","dec", "jmp", "bne","red","prn", "jsr" , "rts", "stop"};
     int i;
 
     for (i = 0; i < sizeof(instructions)/sizeof(instructions[0]) ; i++) {
-        if (strcmp(word, instructions[i]) == 0) {
+        if (strcmp(word, instructions[i].name) == 0) {
             return TRUE;
         }
     }

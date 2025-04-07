@@ -113,7 +113,6 @@ void update_ic(const char *line, int *ic) {
     char temp_line[MAX_LINE_LEN];
     char *word;
     int count = 0;
-    int is_register_found = FALSE;
 
     strcpy(temp_line, line);
 
@@ -132,12 +131,8 @@ void update_ic(const char *line, int *ic) {
     word = strtok(NULL, " ,");
 
     while (word != NULL) {
-        count++;
-        if (is_register(word)) {
-            if (is_register_found) {
-                count--;
-            }
-            is_register_found = TRUE;
+        if (!is_register(word)) {
+            count++;
         }
         word = strtok(NULL, " ,");
     }
