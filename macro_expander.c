@@ -39,6 +39,9 @@ void replace_macros(FILE* file_to_read, FILE* file_to_write, struct macro *macro
     char* line_to_compare;
     while (fgets(line, MAX_LINE_LEN, file_to_read)) {
         remove_whitespaces_from_string(line, &line_to_compare);
+        if (current_macro == NULL) {
+            fprintf(file_to_write, "%s", line);
+        }
         while (current_macro != NULL) {
             if (compare_strings_until_null_terminator(line_to_compare, current_macro->name) == TRUE) {
                 current_line = current_macro->first_line;

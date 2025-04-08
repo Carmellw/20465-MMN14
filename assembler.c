@@ -14,7 +14,7 @@ int main(int argc, char** argv) {
     int ic = 100;
     int dc = 0;
 
-    expand_macros("/Users/carmellwasserman/Desktop/test4.as", &result);
+    expand_macros("/Users/carmellwasserman/Desktop/ps.as", &result);
     printf("%s\n", result);
 
     first_pass_file(result, labels, entries, &ic, &dc);

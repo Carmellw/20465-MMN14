@@ -16,13 +16,13 @@ void second_pass_file(const char *file_path, struct label *labels, struct entry 
     struct label *current_label = NULL;
     struct entry *current_entry = NULL;
 
-    fprintf(fp, "%d %d\n", ic-100, dc);
+    fprintf(fp2, "%d %d\n", ic-100, dc);
 
     ic = 100;
     dc = 0;
 
     while (fgets(line, MAX_LINE_LEN, fp)) {
-        handle_line2(line, fp, labels, entries, &ic, &dc);
+        handle_line2(line, fp2, labels, entries, &ic, &dc);
     }
 
     fclose(fp);
@@ -75,12 +75,17 @@ enum status_code handle_code_line(const char* line, FILE *file_to_write, struct 
     operand1 = strtok(NULL, ", \n");
     operand2 = strtok(NULL, ", \n");
 
+    if (operand2 == NULL) {
+        operand2 = operand1;
+        operand1 = NULL;
+    }
+
     status_code = convert_code_line_to_binary(instruction, operand1, operand2, &command);
     if (status_code != SUCCESS) {
         return status_code;
     }
 
-    fprintf(file_to_write, "%d %06X\n", *ic, command);
+    fprintf(file_to_write, "%d %06X %s\n", *ic, command, instruction);
 
     if (operand1 != NULL) {
         //int val = encode_operand(operand1, labels);
@@ -124,12 +129,12 @@ enum status_code convert_code_line_to_binary(const char* instruction, const char
     }
 
     *command = 0;
-    *command |= (instruction_struct.opcode & 0xF) << 18;
+    *command |= (instruction_struct.opcode & 0x3F) << 18;
     *command |= (src_addressing_type & 0x3) << 16;
-    *command |= (src_reg & 0xF) << 13;
+    *command |= (src_reg & 0x7) << 13;
     *command |= (dst_addressing_type & 0x3) << 11;
-    *command |= (dst_reg & 0xF) << 7;
-    *command |= (instruction_struct.funct & 0xF) << 3;
+    *command |= (dst_reg & 0x7) << 8;
+    *command |= (instruction_struct.funct & 0x1F) << 3;
     *command |= 1 << 2;
     *command |= 0 << 1;
     *command |= 0;
@@ -153,7 +158,7 @@ enum addressing_type get_addressing_type(const char *operand) {
         return IMMEDIATE;
     }
     if (operand[0] == '&') {
-        return IMMEDIATE;
+        return RELATIVE;
     }
     if (is_register(operand)) {
         return REGISTER;

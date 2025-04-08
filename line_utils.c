@@ -99,7 +99,7 @@ int get_line_type(const char *line, enum line_type *type) {
 int is_instruction(const char *word) {
     int i = instructions_count;
 
-    for (i = 0; i < sizeof(instructions_count) ; i++) {
+    for (i = 0; i < instructions_count ; i++) {
         if (strcmp(word, instructions[i].name) == 0) {
             return TRUE;
         }
