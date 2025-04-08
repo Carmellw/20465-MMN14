@@ -144,7 +144,7 @@ enum status_code convert_code_line_to_binary(const char* instruction, const char
 
 enum status_code get_instruction(const char *name, struct instruction *instruction) {
     int i;
-    for (i = 0; i < 16; i++) {
+    for (i = 0; i < instructions_count; i++) {
         if (strcmp(name, instructions[i].name) == 0) {
             *instruction = instructions[i];
             return SUCCESS;
