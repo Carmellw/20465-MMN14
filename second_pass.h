@@ -23,4 +23,9 @@ void handle_line2(const char* line, FILE *file_to_write, struct label *labels, s
 
 void second_pass_file(const char *file_path, struct label *labels, struct entry *entries, int ic, int dc);
 
+enum status_code get_label(const char *name, const struct label *labels, struct label *label);
+
+enum status_code get_operand_value(const char *operand, enum addressing_type addressing_type, struct label *labels, const int command_address, int* value);
+
+
 #endif //SECOND_PASS_H

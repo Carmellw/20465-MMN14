@@ -116,5 +116,5 @@ char *trim_whitespaces_from_start(const char *line) {
 }
 
 int is_register(const char *str) {
-    return str[0] == 'r' && str[1] >= '0' && str[1] <= '7' && str[2] == '\0';
+    return str[0] == 'r' && str[1] >= '0' && str[1] <= '7' && (str[2] == '\0' || str[2] == '\n' || str[2] == ' ');
 }

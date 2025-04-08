@@ -7,7 +7,8 @@
 
 enum status_code {
     SUCCESS,
-    UNKNOWN_ERROR
+    UNKNOWN_ERROR,
+    LABEL_NOT_FOUND
 };
 
 #endif //STATUS_CODES_H

@@ -6,6 +6,8 @@
 #include "status_codes.h"
 #include "second_pass.h"
 
+#include <stdlib.h>
+
 #include "first_pass.h"
 #include "intstruction.h"
 
@@ -58,6 +60,9 @@ enum status_code handle_code_line(const char* line, FILE *file_to_write, struct 
     int word_count = 0;
     enum status_code status_code;
     unsigned int command = 0;
+    int operand_value = 0;
+    enum addressing_type addressing_type;
+    int command_address;
 
     strcpy(temp_line, line);
 
@@ -86,13 +91,28 @@ enum status_code handle_code_line(const char* line, FILE *file_to_write, struct 
     }
 
     fprintf(file_to_write, "%d %06X %s\n", *ic, command, instruction);
+    command_address = (*ic)++;
 
     if (operand1 != NULL) {
-        //int val = encode_operand(operand1, labels);
-        //fprintf(file_to_write, "%d %d\n", get_next_ic(), val);
-        if (operand2 != NULL) {
-            //int val = encode_operand(operand2, labels);
-            //fprintf(file_to_write, "%d %d\n", get_next_ic(), val);
+        addressing_type = get_addressing_type(operand1);
+        if (addressing_type != REGISTER) {
+            status_code = get_operand_value(operand1, addressing_type, labels, command_address, &operand_value);
+            if (status_code != SUCCESS) {
+                return status_code;
+            }
+            fprintf(file_to_write, "%d %06X %s\n", *ic, operand_value, operand1);
+            (*ic)++;
+        }
+    }
+    if (operand2 != NULL) {
+        addressing_type = get_addressing_type(operand2);
+        if (addressing_type != REGISTER) {
+            status_code = get_operand_value(operand2, addressing_type, labels, command_address, &operand_value);
+            if (status_code != SUCCESS) {
+                return status_code;
+            }
+            fprintf(file_to_write, "%d %06X %s\n", *ic, operand_value, operand1);
+            (*ic)++;
         }
     }
 
@@ -164,6 +184,75 @@ enum addressing_type get_addressing_type(const char *operand) {
         return REGISTER;
     }
     return DIRECT;
+}
+
+enum status_code get_operand_value(const char *operand, enum addressing_type addressing_type, struct label *labels, const int command_address, int* value) {
+    enum status_code status_code;
+    char *endptr;
+    struct label label;
+    int temp_value = 0;
+
+    *value = 0;
+
+    switch (addressing_type) {
+        case REGISTER:
+            *value = 0;
+            return SUCCESS;
+        case IMMEDIATE:
+            temp_value = (int)strtol(operand + 1, &endptr, 10);
+            if (*endptr != '\0') {
+                return UNKNOWN_ERROR;
+            }
+            *value |= (temp_value & 0x1FFFFF) << 3;
+            *value |= 1 << 2;
+            *value |= 0 << 1;
+            *value |= 0;
+            return SUCCESS;
+        case RELATIVE:
+            operand++;
+            status_code = get_label(operand, labels, &label);
+            if (status_code != SUCCESS) {
+                return status_code;
+            }
+            *value |= (label.address - command_address & 0x1FFFFF) << 3;
+            *value |= 1 << 2;
+            *value |= 0 << 1;
+            *value |= 0;
+            return SUCCESS;
+        case DIRECT:
+            status_code = get_label(operand, labels, &label);
+            if (status_code != SUCCESS) {
+                return status_code;
+            }
+            *value |= (label.address & 0x1FFFFF) << 3;
+            if (label.type == EXTERN) {
+                *value |= 0 << 2;
+                *value |= 0 << 1;
+                *value |= 1;
+            }
+            else{
+                *value |= 0 << 2;
+                *value |= 1 << 1;
+                *value |= 0;
+            }
+
+            return SUCCESS;
+    }
+    return UNKNOWN_ERROR;
+}
+
+enum status_code get_label(const char *name, const struct label *labels, struct label *label) {
+    const struct label *current_label = labels;
+
+    while (current_label != NULL) {
+        if (strcmp(name, current_label->name) == 0) {
+            *label = *current_label;
+            return SUCCESS;
+        }
+        current_label = current_label->next_label;
+    }
+
+    return LABEL_NOT_FOUND;
 }
 
 

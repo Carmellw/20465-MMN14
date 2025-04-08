@@ -17,6 +17,6 @@ int main(int argc, char** argv) {
     expand_macros("/Users/carmellwasserman/Desktop/ps.as", &result);
     printf("%s\n", result);
 
-    first_pass_file(result, labels, entries, &ic, &dc);
+    first_pass_file(result, &labels, &entries, &ic, &dc);
     second_pass_file(result, labels, entries, ic, dc);
 }
