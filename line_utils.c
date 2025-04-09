@@ -7,7 +7,7 @@
 #include "instruction.h"
 #include "status_codes.h"
 
-int get_label_name_if_exist(const char *line, const enum line_type type, char *label_name) {
+int get_label_name_if_exist(const char *line, const enum line_type type, char label_name[]) {
     char temp_line[MAX_LINE_LEN];
     char *temp_label;
     int i = 0;
@@ -25,8 +25,8 @@ int get_label_name_if_exist(const char *line, const enum line_type type, char *l
             break;
         case EXTERN:
         case ENTRY:
-            strtok(temp_line, " \n");
-            temp_label = strtok(NULL, " \n");
+            strtok(temp_line, " \n\t");
+            temp_label = strtok(NULL, " \n\t");
             if (temp_label == NULL) {
                 return FALSE;
             }
@@ -53,7 +53,7 @@ int get_label_name_if_exist(const char *line, const enum line_type type, char *l
     return TRUE;
 }
 
-int get_line_type(const char *line, enum line_type *type) {
+enum status_code get_line_type(const char *line, enum line_type *type) {
     char temp_line[MAX_LINE_LEN];
     char *word;
 
@@ -61,9 +61,9 @@ int get_line_type(const char *line, enum line_type *type) {
 
     if (strchr(line, ':') != NULL) {
         strtok(temp_line, ":");
-        word = strtok(NULL, " \n");
+        word = strtok(NULL, " \n\t");
     } else {
-        word = strtok(temp_line, " \n");
+        word = strtok(temp_line, " \n\t");
     }
 
     if (word == NULL) {
@@ -86,10 +86,10 @@ int get_line_type(const char *line, enum line_type *type) {
     } else if (strncmp(word, ".entry", 6) == 0) {
         *type = ENTRY;
     } else {
-        return FALSE;
+        return UNKNOWN_LINE_TYPE;
     }
 
-    return TRUE;
+    return SUCCESS;
 }
 
 int is_instruction(const char *word) {

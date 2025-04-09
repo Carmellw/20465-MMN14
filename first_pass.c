@@ -50,7 +50,7 @@ enum status_code first_pass_file(const char *file_path, struct label **labels, i
 
 enum status_code handle_line(const char *line, const struct label *first_label, struct label **current_label, int *ic,
                              int *dc, int *address_counter) {
-    const char label[MAX_LABEL_LEN];
+    char label[MAX_LABEL_LEN];
     enum line_type line_type;
     int is_label_in_line;
     if (line[0] == '\0' || line[0] == '\n' || line[0] == ';') {
@@ -157,9 +157,9 @@ void update_ic(const char *line, int *ic, int *address_counter) {
 
     if (strchr(temp_line, ':')) {
         strtok(temp_line, ":");
-        word = strtok(NULL, " \n");
+        word = strtok(NULL, " \n\t");
     } else {
-        word = strtok(temp_line, " \n");
+        word = strtok(temp_line, " \n\t");
     }
 
     if (word == NULL) {

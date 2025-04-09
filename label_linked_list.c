@@ -20,11 +20,11 @@ void add_label(const char *name, const enum line_type type, const int address, s
     }
 }
 
-void free_labels(struct label *first_line) {
+void free_labels(struct label *first_label) {
     struct label *temp_label;
-    while (first_line != NULL) {
-        temp_label = first_line;
-        first_line = first_line->next_label;
+    while (first_label != NULL) {
+        temp_label = first_label;
+        first_label = first_label->next_label;
         free(temp_label);
     }
 }

@@ -11,8 +11,7 @@
 #include "label_linked_list.h"
 
 enum status_code handle_line2(const char *line, FILE *file_to_write, FILE *entry_file, FILE *extern_file,
-                              struct label *labels,
-                              int *ic);
+                              struct label *labels, int *ic, int *is_entry_found, int *is_extern_found);
 
 enum status_code handle_code_line(const char *line, FILE *file_to_write, FILE *extern_file, struct label *labels,
                                   int *ic);
@@ -31,7 +30,8 @@ enum status_code get_instruction(const char *name, struct instruction *instructi
 
 enum addressing_type get_addressing_type(const char *operand);
 
-enum status_code get_operand_value(const char *operand, enum addressing_type addressing_type, const struct label *labels,
+enum status_code get_operand_value(const char *operand, enum addressing_type addressing_type,
+                                   const struct label *labels,
                                    int command_address, int *value, int *is_extern);
 
 enum status_code second_pass_file(const char *file_path, struct label *labels, int ic, const int dc) {
@@ -43,6 +43,10 @@ enum status_code second_pass_file(const char *file_path, struct label *labels, i
     char *ent_file_path;
     char *ext_file_path;
     char line[MAX_LINE_LEN];
+    int is_file_successful = TRUE;
+    enum status_code status_code;
+    int is_entry_found = FALSE;
+    int is_extern_found = FALSE;
 
     ob_file_path = get_new_path(file_path, NULL, "ob");
     ent_file_path = get_new_path(file_path, NULL, "ent");
@@ -57,7 +61,11 @@ enum status_code second_pass_file(const char *file_path, struct label *labels, i
     ic = 100;
 
     while (fgets(line, MAX_LINE_LEN, read_file)) {
-        handle_line2(line, ob_file, ent_file, ext_file, labels, &ic);
+        status_code = handle_line2(line, ob_file, ent_file, ext_file, labels, &ic, &is_entry_found, &is_extern_found);
+        if (status_code != SUCCESS) {
+            is_file_successful = FALSE;
+            fprintf(stderr, "Error while reading line:\n\"%s\"\n", line);
+        }
     }
 
     fclose(read_file);
@@ -65,25 +73,43 @@ enum status_code second_pass_file(const char *file_path, struct label *labels, i
     fclose(ent_file);
     fclose(ext_file);
 
-    printf("Created files %s %s %s\n", ob_file_path, ent_file_path, ext_file_path);
+    printf("Created files %s", ob_file_path);
+
+    if (is_entry_found) {
+        printf(" %s", ent_file_path);
+    } else {
+        remove(ent_file_path);
+    }
+    if (is_extern_found) {
+        printf(" %s", ext_file_path);
+    } else {
+        remove(ext_file_path);
+    }
+
+    printf("\n");
 
     free(ob_file_path);
     free(ent_file_path);
     free(ext_file_path);
 
+    if (!is_file_successful) {
+        return FILE_FAILED;
+    }
     return SUCCESS;
 }
 
 enum status_code handle_line2(const char *line, FILE *file_to_write, FILE *entry_file, FILE *extern_file,
-                              struct label *labels,
-                              int *ic) {
+                              struct label *labels, int *ic, int *is_entry_found, int *is_extern_found) {
     enum line_type label_type;
     enum status_code status_code;
     if (line[0] == '\0' || line[0] == '\n' || line[0] == ';') {
         return SUCCESS;
     }
 
-    get_line_type(line, &label_type);
+    status_code = get_line_type(line, &label_type);
+    if (status_code != SUCCESS) {
+        return status_code;
+    }
 
     switch (label_type) {
         case CODE:
@@ -97,6 +123,7 @@ enum status_code handle_line2(const char *line, FILE *file_to_write, FILE *entry
             if (status_code != SUCCESS) {
                 return status_code;
             }
+            *is_entry_found = TRUE;
             break;
         case DATA:
             status_code = handle_data_line(line, file_to_write, ic);
@@ -105,6 +132,7 @@ enum status_code handle_line2(const char *line, FILE *file_to_write, FILE *entry
             }
             break;
         case EXTERN:
+            *is_extern_found = TRUE;
             break;
     }
 
@@ -128,17 +156,17 @@ enum status_code handle_code_line(const char *line, FILE *file_to_write, FILE *e
 
     if (strchr(temp_line, ':') != NULL) {
         strtok(temp_line, ":");
-        instruction = strtok(NULL, " \n");
+        instruction = strtok(NULL, " \n\t");
     } else {
-        instruction = strtok(temp_line, " \n");
+        instruction = strtok(temp_line, " \n\t");
     }
 
     if (!is_instruction(instruction)) {
         return UNKNOWN_ERROR;
     }
 
-    operand1 = strtok(NULL, ", \n");
-    operand2 = strtok(NULL, ", \n");
+    operand1 = strtok(NULL, ", \n\t");
+    operand2 = strtok(NULL, ", \n\t");
 
     if (operand2 == NULL) {
         operand2 = operand1;
@@ -199,9 +227,9 @@ enum status_code handle_data_line(const char *line, FILE *file_to_write, int *ic
 
     if (strchr(temp_line, ':') != NULL) {
         strtok(temp_line, ":");
-        data_type_str = strtok(NULL, " \n");
+        data_type_str = strtok(NULL, " \n\t");
     } else {
-        data_type_str = strtok(temp_line, " \n");
+        data_type_str = strtok(temp_line, " \n\t");
     }
 
     status_code = get_data_type(data_type_str, &data_type);
@@ -209,14 +237,14 @@ enum status_code handle_data_line(const char *line, FILE *file_to_write, int *ic
         return status_code;
     }
 
-    data = strtok(NULL, " \n");
+    data = strtok(NULL, " \n\t");
 
     switch (data_type) {
         case DEFAULT:
             while (data != NULL) {
                 data_value = atoi(data) & 0xFFFFFF;
                 fprintf(file_to_write, "%07d %06x\n", *ic, data_value);
-                data = strtok(NULL, ", \n");
+                data = strtok(NULL, ", \n\t");
                 (*ic)++;
             }
             break;
@@ -243,8 +271,8 @@ enum status_code handle_entry_line(const char *line, FILE *file_to_write, const 
 
     strcpy(temp_line, line);
 
-    strtok(temp_line, " \n");
-    label_name = strtok(NULL, " \n");
+    strtok(temp_line, " \n\t");
+    label_name = strtok(NULL, " \n\t");
 
     status_code = get_label(label_name, labels, &label);
     if (status_code != SUCCESS) {
@@ -265,8 +293,8 @@ enum status_code handle_extern_operand(const char *line, FILE *file_to_write, co
 
     strcpy(temp_line, line);
 
-    strtok(temp_line, " \n");
-    label_name = strtok(NULL, " \n");
+    strtok(temp_line, " \n\t");
+    label_name = strtok(NULL, " \n\t");
 
     status_code = get_label(label_name, labels, &label);
     if (status_code != SUCCESS) {
@@ -359,7 +387,8 @@ enum addressing_type get_addressing_type(const char *operand) {
     return ILLEGAL;
 }
 
-enum status_code get_operand_value(const char *operand, const enum addressing_type addressing_type, const struct label *labels,
+enum status_code get_operand_value(const char *operand, const enum addressing_type addressing_type,
+                                   const struct label *labels,
                                    const int command_address, int *value, int *is_extern) {
     enum status_code status_code;
     char *endptr;

@@ -20,11 +20,20 @@ int main(const int argc, char **argv) {
         status_code = expand_macros(argv[i], &result);
         if (status_code != SUCCESS) {
             fprintf(stderr, "Error expanding macros for file %s, moving to next file...\n", argv[i]);
+            if (result != NULL) {
+                free(result);
+            }
             continue;
         }
         status_code = first_pass_file(result, &labels, &ic, &dc);
         if (status_code != SUCCESS) {
             fprintf(stderr, "Error at first pass for file %s, moving to next file...\n", argv[i]);
+            if (result != NULL) {
+                free(result);
+            }
+            if (labels != NULL) {
+                free_labels(labels);
+            }
             continue;
         }
         status_code = second_pass_file(result, labels, ic, dc);
@@ -35,7 +44,9 @@ int main(const int argc, char **argv) {
         if (result != NULL) {
             free(result);
         }
-        free_labels(labels);
+        if (labels != NULL) {
+            free_labels(labels);
+        }
 
         ic = 100;
         dc = 0;

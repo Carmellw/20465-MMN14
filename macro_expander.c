@@ -11,6 +11,8 @@
 #include "status_codes.h"
 #include "path_utils.h"
 
+void replace_macros(FILE *file_to_read, FILE *file_to_write, struct macro *macros);
+
 enum status_code separate_macros_from_file(FILE *file_to_read, FILE *file_to_write, struct macro **macros);
 
 char *get_macro_name(char *line);
