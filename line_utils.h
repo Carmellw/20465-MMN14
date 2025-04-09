@@ -17,7 +17,7 @@ void trim_whitespaces_from_start(const char *line);
 
 int is_register(const char *str);
 
-int is_all_digits(const char *str);
+int is_number(const char *str);
 
 int is_legal_label(const char *label);
 

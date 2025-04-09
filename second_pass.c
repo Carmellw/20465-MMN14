@@ -31,7 +31,7 @@ enum status_code get_instruction(const char *name, struct instruction *instructi
 
 enum addressing_type get_addressing_type(const char *operand);
 
-enum status_code get_operand_value(const char *operand, enum addressing_type addressing_type, struct label *labels,
+enum status_code get_operand_value(const char *operand, enum addressing_type addressing_type, const struct label *labels,
                                    int command_address, int *value, int *is_extern);
 
 enum status_code second_pass_file(const char *file_path, struct label *labels, int ic, const int dc) {
@@ -344,7 +344,7 @@ enum status_code get_instruction(const char *name, struct instruction *instructi
 
 enum addressing_type get_addressing_type(const char *operand) {
     if (operand[0] == '#') {
-        if (is_all_digits(operand + 1)) {
+        if (is_number(operand + 1)) {
             return IMMEDIATE;
         }
     } else if (operand[0] == '&') {
@@ -359,7 +359,7 @@ enum addressing_type get_addressing_type(const char *operand) {
     return ILLEGAL;
 }
 
-enum status_code get_operand_value(const char *operand, enum addressing_type addressing_type, struct label *labels,
+enum status_code get_operand_value(const char *operand, const enum addressing_type addressing_type, const struct label *labels,
                                    const int command_address, int *value, int *is_extern) {
     enum status_code status_code;
     char *endptr;

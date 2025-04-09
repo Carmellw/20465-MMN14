@@ -159,7 +159,7 @@ int is_legal_label(const char *label) {
         return FALSE;
     }
     while (label[i] != '\0') {
-        if (!isalpha(label[i]) || isdigit(label[i])) {
+        if (!isalpha(label[i]) && !isdigit(label[i])) {
             return FALSE;
         }
         i++;

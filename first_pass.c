@@ -60,6 +60,12 @@ enum status_code handle_line(const char *line, const struct label *first_label, 
     get_line_type(line, &line_type);
 
     is_label_in_line = get_label_name_if_exist(line, line_type, label);
+    if (is_label_in_line == TRUE) {
+        if (!is_legal_label(label)) {
+            fprintf(stderr, "Label %s is not a legal label (skipping label)\n", label);
+            return ILLEGAL_LABEL;
+        }
+    }
 
     switch (line_type) {
         case CODE:
