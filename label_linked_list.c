@@ -18,3 +18,12 @@ void add_label(const char *name, const enum line_type type, const int address, s
         (*last_label)->next_label = new_label;
     }
 }
+
+void free_labels(struct label *first_line) {
+    struct label *temp_label;
+    while (first_line != NULL) {
+        temp_label = first_line;
+        first_line = first_line->next_label;
+        free(temp_label);
+    }
+}

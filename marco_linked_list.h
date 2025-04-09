@@ -10,4 +10,6 @@ void add_line(const char *line_content, struct line **last_line);
 
 void add_first_line_to_macro(const char *line_content, struct macro **macro);
 
+void free_macros(struct macro *first_macro);
+
 #endif //MARCO_LINKED_LIST_H

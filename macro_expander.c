@@ -62,6 +62,8 @@ enum status_code expand_macros(const char *file_path, const char **result_file_p
 
     *result_file_path = temp_file_path;
 
+    free_macros(first_macro);
+
     return SUCCESS;
 }
 
@@ -88,6 +90,7 @@ void replace_macros(FILE *file_to_read, FILE *file_to_write, struct macro *macro
             current_macro = current_macro->next_macro;
         }
         current_macro = macros;
+        free(line_to_compare);
     }
 }
 

@@ -24,6 +24,11 @@ enum status_code first_pass_file(const char *file_path, struct label **labels, i
     *dc = 0;
     int address_counter = 100;
 
+    if (read_file == NULL) {
+        fprintf(stderr, "Error opening file %s\n", file_path);
+        return FAILED_OPENING_FILE;
+    }
+
     while (fgets(line, MAX_LINE_LEN, read_file)) {
         handle_line(line, &current_label, ic, dc, &address_counter);
         if (first_label == NULL) {
