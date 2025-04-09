@@ -15,9 +15,6 @@ add_executable(MMN14 assembler.c
         label.h
         label_linked_list.h
         label_linked_list.c
-        extern_struct.h
-        entry_linked_list.h
-        entry_linked_list.c
         second_pass.c
         second_pass.h
         line_utils.c
@@ -25,4 +22,6 @@ add_executable(MMN14 assembler.c
         status_codes.h
         intstruction.h
         intstruction.c
+        path_utils.h
+        path_utils.c
 )

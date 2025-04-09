@@ -6,40 +6,39 @@
 #include "first_pass.h"
 #include "label_linked_list.h"
 #include "label.h"
-#include "extern_struct.h"
-#include "entry_linked_list.h"
 #include "line_utils.h"
+#include "status_codes.h"
 
-void first_pass_file(const char* file_path, struct label **labels, struct extern_struct **entries, int *ic, int *dc) {
-    FILE *fp = fopen(file_path, "r");
-    FILE *fp2 = fopen("/Users/carmellwasserman/Desktop/example4.txt", "w");
+void handle_line(const char *line, struct label **current_label, int *ic, int *dc, int *address_counter);
+
+void update_dc(const char *line, int *dc, int *address_counter);
+
+void update_ic(const char *line, int *ic, int *address_counter);
+
+enum status_code first_pass_file(const char *file_path, struct label **labels, int *ic, int *dc) {
+    FILE *read_file = fopen(file_path, "r");
     char line[MAX_LINE_LEN];
     struct label *first_label = NULL;
     struct label *current_label = NULL;
-    struct extern_struct *first_entry = NULL;
-    struct extern_struct *current_entry = NULL;
     *ic = 100;
     *dc = 0;
     int address_counter = 100;
 
-    while (fgets(line, MAX_LINE_LEN, fp)) {
-        handle_line(line, fp2, &current_label, &current_entry, ic, dc, &address_counter);
+    while (fgets(line, MAX_LINE_LEN, read_file)) {
+        handle_line(line, &current_label, ic, dc, &address_counter);
         if (first_label == NULL) {
             first_label = current_label;
-        }
-        if (first_entry == NULL) {
-            first_entry = current_entry;
         }
     }
 
     *labels = first_label;
-    *entries = first_entry;
 
-    fclose(fp);
-    fclose(fp2);
+    fclose(read_file);
+
+    return SUCCESS;
 }
 
-void handle_line(const char* line, FILE* file_to_write, struct label **current_label, struct extern_struct **current_entry, int *ic, int *dc, int* address_counter) {
+void handle_line(const char *line, struct label **current_label, int *ic, int *dc, int *address_counter) {
     const char label[MAX_LABEL_LEN];
     enum line_type line_type;
     int is_label_exist;
@@ -79,17 +78,11 @@ void handle_line(const char* line, FILE* file_to_write, struct label **current_l
             }
             break;
         case ENTRY:
-            if (is_label_exist) {
-                add_extern(label, current_entry);
-                if ((*current_entry)->next_extern != NULL) {
-                    *current_entry = (*current_entry)->next_extern;
-                }
-            }
             break;
     }
 }
 
-void update_dc(const char *line, int *dc, int* address_counter) {
+void update_dc(const char *line, int *dc, int *address_counter) {
     char temp_line[MAX_LINE_LEN];
     char *word;
 
@@ -102,9 +95,8 @@ void update_dc(const char *line, int *dc, int* address_counter) {
             (*address_counter)++;
             word = strtok(NULL, ",");
         }
-    }
-    else if (strstr(line, ".string")) {
-        word = strtok(NULL, " \"");
+    } else if (strstr(line, ".string")) {
+        strtok(NULL, " \"");
         word = strtok(NULL, " \"");
         while (strlen(word) > 0) {
             (*dc)++;
@@ -126,8 +118,7 @@ void update_ic(const char *line, int *ic, int *address_counter) {
     if (strchr(temp_line, ':')) {
         strtok(temp_line, ":");
         word = strtok(NULL, " \n");
-    }
-    else {
+    } else {
         word = strtok(temp_line, " \n");
     }
 

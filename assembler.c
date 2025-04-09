@@ -2,21 +2,32 @@
 #include <stdlib.h>
 
 #include "first_pass.h"
-#include "macro.h"
-#include "marco_linked_list.h"
+#include "status_codes.h"
 #include "macro_expander.h"
 #include "second_pass.h"
 
-int main(int argc, char** argv) {
+int main(const int argc, char **argv) {
     char *result;
     struct label *labels = NULL;
-    struct extern_struct *entries = NULL;
     int ic = 100;
     int dc = 0;
+    enum status_code status_code;
 
-    expand_macros("/Users/carmellwasserman/Desktop/ps.as", &result);
-    printf("%s\n", result);
+    for (int i = 1; i < argc; i++) {
+        status_code = expand_macros(argv[i], &result);
+        if (status_code != SUCCESS) {
+            fprintf(stderr, "Error expanding macros for file %s, moving to next file...\n", argv[i]);
+        }
+        status_code = first_pass_file(result, &labels, &ic, &dc);
+        if (status_code != SUCCESS) {
+            fprintf(stderr, "Error at first pass for file %s, moving to next file...\n", argv[i]);
+        }
+        status_code = second_pass_file(result, labels, ic, dc);
+        if (status_code != SUCCESS) {
+            fprintf(stderr, "Error at second pass for file %s\n", argv[i]);
+        }
+    }
 
-    first_pass_file(result, &labels, &entries, &ic, &dc);
-    second_pass_file(result, labels, entries, ic, dc);
+    free(result);
+    return SUCCESS;
 }

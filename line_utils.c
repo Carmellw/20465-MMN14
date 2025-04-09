@@ -7,7 +7,7 @@
 #include "intstruction.h"
 #include "status_codes.h"
 
-int get_label_name_if_exist(const char* line, const enum line_type type, char* label_name) {
+int get_label_name_if_exist(const char *line, const enum line_type type, char *label_name) {
     char temp_line[MAX_LINE_LEN];
     char *temp_label;
     int i = 0;
@@ -21,16 +21,16 @@ int get_label_name_if_exist(const char* line, const enum line_type type, char* l
                 return FALSE;
             }
 
-        temp_label = strtok(temp_line, ":");
-        break;
+            temp_label = strtok(temp_line, ":");
+            break;
         case EXTERN:
         case ENTRY:
-            temp_label = strtok(temp_line, " \n");
-        temp_label = strtok(NULL, " \n");
-        if (temp_label == NULL) {
-            return FALSE;
-        }
-        break;
+            strtok(temp_line, " \n");
+            temp_label = strtok(NULL, " \n");
+            if (temp_label == NULL) {
+                return FALSE;
+            }
+            break;
         default:
             return FALSE;
     }
@@ -60,10 +60,9 @@ int get_line_type(const char *line, enum line_type *type) {
     strcpy(temp_line, line);
 
     if (strchr(line, ':') != NULL) {
-        word = strtok(temp_line, ":");
+        strtok(temp_line, ":");
         word = strtok(NULL, " \n");
-    }
-    else {
+    } else {
         word = strtok(temp_line, " \n");
     }
 
@@ -80,17 +79,13 @@ int get_line_type(const char *line, enum line_type *type) {
 
     if (word == NULL || is_instruction(word)) {
         *type = CODE;
-    }
-    else if (is_data_instruction(word)) {
+    } else if (is_data_instruction(word)) {
         *type = DATA;
-    }
-    else if (strncmp(word, ".extern", 7) == 0) {
+    } else if (strncmp(word, ".extern", 7) == 0) {
         *type = EXTERN;
-    }
-    else if (strncmp(word, ".entry", 6) == 0) {
+    } else if (strncmp(word, ".entry", 6) == 0) {
         *type = ENTRY;
-    }
-    else {
+    } else {
         return FALSE;
     }
 
@@ -98,9 +93,9 @@ int get_line_type(const char *line, enum line_type *type) {
 }
 
 int is_instruction(const char *word) {
-    int i = instructions_count;
+    int i;
 
-    for (i = 0; i < instructions_count ; i++) {
+    for (i = 0; i < instructions_count; i++) {
         if (strcmp(word, instructions[i].name) == 0) {
             return TRUE;
         }
@@ -128,11 +123,10 @@ enum status_code get_data_type(const char *word, enum data_type *type) {
     return DATA_TYPE_NOT_FOUND;
 }
 
-char *trim_whitespaces_from_start(const char *line) {
+void trim_whitespaces_from_start(const char *line) {
     while (isspace(*line)) {
         line++;
     }
-    return line;
 }
 
 int is_register(const char *str) {

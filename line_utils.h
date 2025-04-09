@@ -17,7 +17,7 @@ int is_data_instruction(const char *word);
 
 enum status_code get_data_type(const char *word, enum data_type *type);
 
-char *trim_whitespaces_from_start(const char *line);
+void trim_whitespaces_from_start(const char *line);
 
 int is_register(const char *str);
 

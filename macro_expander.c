@@ -8,35 +8,68 @@
 #include "macro.h"
 #include "marco_linked_list.h"
 #include "line_utils.h"
+#include "status_codes.h"
+#include "path_utils.h"
 
-void expand_macros(const char *file_path, const char **result_file_path) {
-    FILE *fp = fopen(file_path, "r"); // TODO: change those names
-    FILE *fp2 = fopen("/Users/carmellwasserman/Desktop/example2.txt", "w"); // TODO: change this to temps or something
+void separate_macros_from_file(FILE *file_to_read, FILE *file_to_write, struct macro **macros);
+
+char *get_macro_name(char *line);
+
+void remove_whitespaces_from_string(const char *str, char **result);
+
+int compare_strings_until_null_terminator(const char *str1, const char *str2);
+
+enum status_code expand_macros(const char *file_path, const char **result_file_path) {
+    FILE *read_file;
+    FILE *write_file;
+    char *temp_file_path;
     struct macro *first_macro = NULL;
 
+    read_file = fopen(file_path, "r");
+    if (read_file == NULL) {
+        fprintf(stderr, "Error opening file %s\n", file_path);
+        return FAILED_OPENING_FILE;
+    }
+    temp_file_path = get_new_path(file_path, "-temp", "txt");
+    write_file = fopen(temp_file_path, "w");
+    if (write_file == NULL) {
+        fprintf(stderr, "Error opening file %s\n", temp_file_path);
+        return FAILED_OPENING_FILE;
+    }
 
-    separate_macros_from_file(fp, fp2, &first_macro);
+    separate_macros_from_file(read_file, write_file, &first_macro);
 
-    fclose(fp);
-    fclose(fp2);
+    fclose(read_file);
+    fclose(write_file);
 
-    fp = fopen("/Users/carmellwasserman/Desktop/example2.txt", "r");
-    fp2 = fopen("/Users/carmellwasserman/Desktop/example3.txt", "w");
+    read_file = fopen(temp_file_path, "r");
+    if (read_file == NULL) {
+        fprintf(stderr, "Error opening file %s\n", temp_file_path);
+        return FAILED_OPENING_FILE;
+    }
+    free(temp_file_path);
+    temp_file_path = get_new_path(file_path, NULL, "am");
+    write_file = fopen(temp_file_path, "w");
+    if (write_file == NULL) {
+        fprintf(stderr, "Error opening file %s\n", temp_file_path);
+        return FAILED_OPENING_FILE;
+    }
 
-    replace_macros(fp, fp2, first_macro);
+    replace_macros(read_file, write_file, first_macro);
 
-    fclose(fp);
-    fclose(fp2);
+    fclose(read_file);
+    fclose(write_file);
 
-    *result_file_path = malloc(strlen("/Users/carmellwasserman/Desktop/example3.txt") + 1);
-    *result_file_path = "/Users/carmellwasserman/Desktop/example3.txt";
+    *result_file_path = temp_file_path;
+
+    return SUCCESS;
 }
 
-void replace_macros(FILE* file_to_read, FILE* file_to_write, struct macro *macros) {
+void replace_macros(FILE *file_to_read, FILE *file_to_write, struct macro *macros) {
     struct macro *current_macro = macros;
     struct line *current_line;
     char line[MAX_LINE_LEN];
-    char* line_to_compare;
+    char *line_to_compare;
     while (fgets(line, MAX_LINE_LEN, file_to_read)) {
         remove_whitespaces_from_string(line, &line_to_compare);
         if (current_macro == NULL) {
@@ -49,8 +82,7 @@ void replace_macros(FILE* file_to_read, FILE* file_to_write, struct macro *macro
                     fprintf(file_to_write, "%s", current_line->line_content);
                     current_line = current_line->next_line;
                 }
-            }
-            else {
+            } else {
                 fprintf(file_to_write, "%s", line);
             }
             current_macro = current_macro->next_macro;
@@ -59,37 +91,32 @@ void replace_macros(FILE* file_to_read, FILE* file_to_write, struct macro *macro
     }
 }
 
-void separate_macros_from_file(FILE* file_to_read, FILE* file_to_write, struct macro **macros) {
+void separate_macros_from_file(FILE *file_to_read, FILE *file_to_write, struct macro **macros) {
     char line[MAX_LINE_LEN];
-    char *trimmed_line;
     int is_in_macro = FALSE;
     struct macro *first_macro = NULL;
     struct macro *current_macro = NULL;
     struct line *current_line = NULL;
 
     while (fgets(line, MAX_LINE_LEN, file_to_read)) {
-        trimmed_line = trim_whitespaces_from_start(line);
-        if (FALSE == is_in_macro && strncmp(trimmed_line, MACRO_START, strlen(MACRO_START)) == 0) {
+        trim_whitespaces_from_start(line);
+        if (FALSE == is_in_macro && strncmp(line, MACRO_START, strlen(MACRO_START)) == 0) {
             is_in_macro = TRUE;
-            add_macro(get_macro_name(trimmed_line), &current_macro);
+            add_macro(get_macro_name(line), &current_macro);
             if (first_macro == NULL) {
                 first_macro = current_macro;
             }
-        }
-        else if (TRUE == is_in_macro && strncmp(trimmed_line, MACRO_END, strlen(MACRO_END)) == 0) {
+        } else if (TRUE == is_in_macro && strncmp(line, MACRO_END, strlen(MACRO_END)) == 0) {
             is_in_macro = FALSE;
-        }
-        else if (TRUE == is_in_macro) {
+        } else if (TRUE == is_in_macro) {
             if (current_macro->first_line == NULL) {
-                add_first_line_to_macro(trimmed_line, &current_macro);
+                add_first_line_to_macro(line, &current_macro);
                 current_line = current_macro->first_line;
+            } else {
+                add_line(line, &current_line);
             }
-            else {
-            add_line(trimmed_line, &current_line);
-            }
-        }
-        else {
-            fprintf(file_to_write, "%s", trimmed_line);
+        } else {
+            fprintf(file_to_write, "%s", line);
         }
     }
     *macros = first_macro;
@@ -99,13 +126,13 @@ char *get_macro_name(char *line) {
     char *name;
     strtok(line, " ");
     name = strtok(NULL, " ");
-    if (name[strlen(name)-1] == '\n') {
-        name[strlen(name)-1] = '\0';
+    if (name[strlen(name) - 1] == '\n') {
+        name[strlen(name) - 1] = '\0';
     }
     return name;
 }
 
-void remove_whitespaces_from_string(char *str, char **result) {
+void remove_whitespaces_from_string(const char *str, char **result) {
     char *new = malloc(strlen(str) + 1);
     char *current_char = new;
 

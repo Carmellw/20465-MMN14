@@ -1,7 +1,3 @@
-//
-// Created by Carmell Wasserman on 07/04/2025.
-//
-
 #ifndef INTSTRUCTION_H
 #define INTSTRUCTION_H
 
