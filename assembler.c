@@ -13,8 +13,9 @@ int main(const int argc, char **argv) {
     int ic = 100;
     int dc = 0;
     enum status_code status_code;
+    int i;
 
-    for (int i = 1; i < argc; i++) {
+    for (i = 1; i < argc; i++) {
         status_code = expand_macros(argv[i], &result);
         if (status_code != SUCCESS) {
             fprintf(stderr, "Error expanding macros for file %s, moving to next file...\n", argv[i]);
