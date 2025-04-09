@@ -8,6 +8,7 @@
 #include "second_pass.h"
 #include "instruction.h"
 #include "path_utils.h"
+#include "label_linked_list.h"
 
 void handle_line2(const char *line, FILE *file_to_write, FILE *entry_file, FILE *extern_file, struct label *labels,
                   int *ic, int *dc);
@@ -31,8 +32,6 @@ enum addressing_type get_addressing_type(const char *operand);
 
 enum status_code get_operand_value(const char *operand, enum addressing_type addressing_type, struct label *labels,
                                    int command_address, int *value, int *is_extern);
-
-enum status_code get_label(const char *name, const struct label *labels, struct label *label);
 
 enum status_code second_pass_file(const char *file_path, struct label *labels, int ic, int dc) {
     FILE *read_file = fopen(file_path, "r");
@@ -398,18 +397,4 @@ enum status_code get_operand_value(const char *operand, enum addressing_type add
             return SUCCESS;
     }
     return UNKNOWN_ERROR;
-}
-
-enum status_code get_label(const char *name, const struct label *labels, struct label *label) {
-    const struct label *current_label = labels;
-
-    while (current_label != NULL) {
-        if (strcmp(name, current_label->name) == 0) {
-            *label = *current_label;
-            return SUCCESS;
-        }
-        current_label = current_label->next_label;
-    }
-
-    return LABEL_NOT_FOUND;
 }

@@ -11,7 +11,7 @@
 #include "status_codes.h"
 #include "path_utils.h"
 
-void separate_macros_from_file(FILE *file_to_read, FILE *file_to_write, struct macro **macros);
+enum status_code separate_macros_from_file(FILE *file_to_read, FILE *file_to_write, struct macro **macros);
 
 char *get_macro_name(char *line);
 
@@ -94,20 +94,30 @@ void replace_macros(FILE *file_to_read, FILE *file_to_write, struct macro *macro
     }
 }
 
-void separate_macros_from_file(FILE *file_to_read, FILE *file_to_write, struct macro **macros) {
+enum status_code separate_macros_from_file(FILE *file_to_read, FILE *file_to_write, struct macro **macros) {
     char line[MAX_LINE_LEN];
     int is_in_macro = FALSE;
     struct macro *first_macro = NULL;
     struct macro *current_macro = NULL;
     struct line *current_line = NULL;
+    char *macro_name;
 
     while (fgets(line, MAX_LINE_LEN, file_to_read)) {
         trim_whitespaces_from_start(line);
         if (FALSE == is_in_macro && strncmp(line, MACRO_START, strlen(MACRO_START)) == 0) {
             is_in_macro = TRUE;
-            add_macro(get_macro_name(line), &current_macro);
-            if (first_macro == NULL) {
-                first_macro = current_macro;
+            macro_name = get_macro_name(line);
+            if (!is_macro_exists(macro_name, first_macro)) {
+                add_macro(macro_name, &current_macro);
+                if (first_macro == NULL) {
+                    first_macro = current_macro;
+                }
+            } else {
+                fprintf(
+                    stderr,
+                    "Error: macro '%s' already exists, you can't have multiple macros with the same name (ignoring macro)\n",
+                    macro_name);
+                return MACRO_ALREADY_EXISTS;
             }
         } else if (TRUE == is_in_macro && strncmp(line, MACRO_END, strlen(MACRO_END)) == 0) {
             is_in_macro = FALSE;
@@ -123,6 +133,7 @@ void separate_macros_from_file(FILE *file_to_read, FILE *file_to_write, struct m
         }
     }
     *macros = first_macro;
+    return SUCCESS;
 }
 
 char *get_macro_name(char *line) {

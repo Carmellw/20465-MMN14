@@ -12,4 +12,6 @@ void add_first_line_to_macro(const char *line_content, struct macro **macro);
 
 void free_macros(struct macro *first_macro);
 
+int is_macro_exists(const char *name, const struct macro *macros);
+
 #endif

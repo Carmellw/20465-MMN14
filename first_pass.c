@@ -9,7 +9,8 @@
 #include "line_utils.h"
 #include "status_codes.h"
 
-void handle_line(const char *line, struct label **current_label, int *ic, int *dc, int *address_counter);
+enum status_code handle_line(const char *line, const struct label *first_label, struct label **current_label, int *ic,
+                             int *dc, int *address_counter);
 
 void update_dc(const char *line, int *dc, int *address_counter);
 
@@ -23,6 +24,7 @@ enum status_code first_pass_file(const char *file_path, struct label **labels, i
     *ic = 100;
     *dc = 0;
     int address_counter = 100;
+    enum status_code status_code;
 
     if (read_file == NULL) {
         fprintf(stderr, "Error opening file %s\n", file_path);
@@ -30,7 +32,10 @@ enum status_code first_pass_file(const char *file_path, struct label **labels, i
     }
 
     while (fgets(line, MAX_LINE_LEN, read_file)) {
-        handle_line(line, &current_label, ic, dc, &address_counter);
+        status_code = handle_line(line, first_label, &current_label, ic, dc, &address_counter);
+        if (status_code != SUCCESS && status_code != LABEL_ALREADY_EXISTS) {
+            return status_code;
+        }
         if (first_label == NULL) {
             first_label = current_label;
         }
@@ -43,48 +48,72 @@ enum status_code first_pass_file(const char *file_path, struct label **labels, i
     return SUCCESS;
 }
 
-void handle_line(const char *line, struct label **current_label, int *ic, int *dc, int *address_counter) {
+enum status_code handle_line(const char *line, const struct label *first_label, struct label **current_label, int *ic,
+                             int *dc, int *address_counter) {
     const char label[MAX_LABEL_LEN];
     enum line_type line_type;
-    int is_label_exist;
+    int is_label_in_line;
     if (line[0] == '\0' || line[0] == '\n' || line[0] == ';') {
-        return;
+        return SUCCESS;
     }
 
     get_line_type(line, &line_type);
 
-    is_label_exist = get_label_name_if_exist(line, line_type, label);
+    is_label_in_line = get_label_name_if_exist(line, line_type, label);
 
     switch (line_type) {
         case CODE:
-            if (is_label_exist) {
-                add_label(label, line_type, *address_counter, current_label);
-                if ((*current_label)->next_label != NULL) {
-                    *current_label = (*current_label)->next_label;
+            if (is_label_in_line) {
+                if (!is_label_exists(label, first_label)) {
+                    add_label(label, line_type, *address_counter, current_label);
+                    if ((*current_label)->next_label != NULL) {
+                        *current_label = (*current_label)->next_label;
+                    }
+                } else {
+                    fprintf(
+                        stderr, "Error: label '%s' already exists, you can't have multiple labels with the same name (ignoring label)\n",
+                        label);
+                    return LABEL_ALREADY_EXISTS;
                 }
             }
             update_ic(line, ic, address_counter);
             break;
         case DATA:
-            if (is_label_exist) {
-                add_label(label, line_type, *address_counter, current_label);
-                if ((*current_label)->next_label != NULL) {
-                    *current_label = (*current_label)->next_label;
+            if (is_label_in_line) {
+                if (!is_label_exists(label, first_label)) {
+                    add_label(label, line_type, *address_counter, current_label);
+                    if ((*current_label)->next_label != NULL) {
+                        *current_label = (*current_label)->next_label;
+                    }
+                } else {
+                    fprintf(
+                        stderr, "Error: label '%s' already exists, you can't have multiple labels with the same name (ignoring label)\n",
+                        label);
+                    return LABEL_ALREADY_EXISTS;
                 }
             }
             update_dc(line, dc, address_counter);
             break;
         case EXTERN:
-            if (is_label_exist) {
-                add_label(label, line_type, 0, current_label);
-                if ((*current_label)->next_label != NULL) {
-                    *current_label = (*current_label)->next_label;
+            if (is_label_in_line) {
+                if (!is_label_exists(label, first_label)) {
+                    add_label(label, line_type, 0, current_label);
+                    if ((*current_label)->next_label != NULL) {
+                        *current_label = (*current_label)->next_label;
+                    }
+                } else {
+                    fprintf(
+                        stderr, "Error: label '%s' already exists, you can't have multiple labels with the same name (ignoring label)\n",
+                        label);
+                    return LABEL_ALREADY_EXISTS;
                 }
             }
             break;
         case ENTRY:
             break;
     }
+
+    return SUCCESS;
 }
 
 void update_dc(const char *line, int *dc, int *address_counter) {

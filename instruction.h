@@ -14,8 +14,8 @@ enum addressing_type {
     REGISTER
 };
 
-struct instruction instructions[];
+extern struct instruction instructions[];
 
-const int instructions_count;
+extern const int instructions_count;
 
 #endif

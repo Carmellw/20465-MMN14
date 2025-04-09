@@ -3,6 +3,7 @@
 
 #include "label.h"
 #include "label_linked_list.h"
+#include "status_codes.h"
 
 void add_label(const char *name, const enum line_type type, const int address, struct label **last_label) {
     struct label *new_label = malloc(sizeof(struct label));
@@ -26,4 +27,31 @@ void free_labels(struct label *first_line) {
         first_line = first_line->next_label;
         free(temp_label);
     }
+}
+
+enum status_code get_label(const char *name, const struct label *labels, struct label *label) {
+    const struct label *current_label = labels;
+
+    while (current_label != NULL) {
+        if (strcmp(name, current_label->name) == 0) {
+            *label = *current_label;
+            return SUCCESS;
+        }
+        current_label = current_label->next_label;
+    }
+
+    return LABEL_NOT_FOUND;
+}
+
+int is_label_exists(const char *name, const struct label *labels) {
+    const struct label *current_label = labels;
+
+    while (current_label != NULL) {
+        if (strcmp(name, current_label->name) == 0) {
+            return TRUE;
+        }
+        current_label = current_label->next_label;
+    }
+
+    return FALSE;
 }

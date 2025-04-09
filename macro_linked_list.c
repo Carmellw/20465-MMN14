@@ -59,3 +59,16 @@ void free_lines(struct line *first_line) {
         free(temp_line);
     }
 }
+
+int is_macro_exists(const char *name, const struct macro *macros) {
+    const struct macro *current_macro = macros;
+
+    while (current_macro != NULL) {
+        if (strcmp(name, current_macro->name) == 0) {
+            return TRUE;
+        }
+        current_macro = current_macro->next_macro;
+    }
+
+    return FALSE;
+}
