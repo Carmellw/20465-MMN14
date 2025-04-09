@@ -44,7 +44,7 @@ int get_label_name_if_exist(const char *line, const enum line_type type, char *l
 
     while (strlen(temp_label) > i) {
         if (!isalnum(temp_label[i])) {
-            return FALSE; // should be error
+            return FALSE;
         }
         i++;
     }

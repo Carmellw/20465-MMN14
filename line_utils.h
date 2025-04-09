@@ -1,7 +1,3 @@
-//
-// Created by Carmell Wasserman on 05/04/2025.
-//
-
 #ifndef LINE_UTILS_H
 #define LINE_UTILS_H
 
