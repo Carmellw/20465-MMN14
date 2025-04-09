@@ -21,4 +21,4 @@ enum data_type {
     STRING
 };
 
-#endif // LABEL_H
+#endif

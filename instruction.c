@@ -1,4 +1,4 @@
-#include "intstruction.h"
+#include "instruction.h"
 
 struct instruction instructions[] =
 {

@@ -4,7 +4,7 @@
 #include "consts.h"
 #include "label.h"
 #include "line_utils.h"
-#include "intstruction.h"
+#include "instruction.h"
 #include "status_codes.h"
 
 int get_label_name_if_exist(const char *line, const enum line_type type, char *label_name) {

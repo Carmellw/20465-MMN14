@@ -9,7 +9,7 @@ add_executable(MMN14 assembler.c
         consts.h
         macro.h
         macro_linked_list.c
-        marco_linked_list.h
+        macro_linked_list.h
         first_pass.c
         first_pass.h
         label.h
@@ -20,8 +20,8 @@ add_executable(MMN14 assembler.c
         line_utils.c
         line_utils.h
         status_codes.h
-        intstruction.h
-        intstruction.c
+        instruction.h
+        instruction.c
         path_utils.h
         path_utils.c
 )

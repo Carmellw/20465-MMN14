@@ -9,4 +9,4 @@ enum status_code {
     FAILED_OPENING_FILE
 };
 
-#endif //STATUS_CODES_H
+#endif

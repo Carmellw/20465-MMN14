@@ -6,7 +6,7 @@
 #include "line_utils.h"
 #include "status_codes.h"
 #include "second_pass.h"
-#include "intstruction.h"
+#include "instruction.h"
 #include "path_utils.h"
 
 void handle_line2(const char *line, FILE *file_to_write, FILE *entry_file, FILE *extern_file, struct label *labels,

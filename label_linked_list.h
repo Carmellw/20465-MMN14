@@ -7,4 +7,4 @@ void add_label(const char *name, const enum line_type type, const int address, s
 
 void free_labels(struct label *first_line);
 
-#endif //LABEL_LINKED_LIST_H
+#endif

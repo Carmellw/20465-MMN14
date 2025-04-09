@@ -11,5 +11,4 @@
 #define MACRO_START "mcro"
 #define MACRO_END "mcroend"
 
-
-#endif // CONSTS_H
+#endif

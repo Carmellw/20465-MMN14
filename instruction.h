@@ -18,4 +18,4 @@ struct instruction instructions[];
 
 const int instructions_count;
 
-#endif //INTSTRUCTION_H
+#endif

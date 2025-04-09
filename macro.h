@@ -13,4 +13,4 @@ struct line{
     struct line *next_line;
 };
 
-#endif // MACRO_H
+#endif

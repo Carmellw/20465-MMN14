@@ -1,8 +1,7 @@
 #include <string.h>
+#include <stdlib.h>
 
 #include "path_utils.h"
-
-#include <stdlib.h>
 
 char *get_new_path(const char *path, const char *add_to_name, const char *new_extension) {
     int path_length;

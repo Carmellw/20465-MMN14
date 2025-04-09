@@ -21,4 +21,4 @@ void trim_whitespaces_from_start(const char *line);
 
 int is_register(const char *str);
 
-#endif //LINE_UTILS_H
+#endif
