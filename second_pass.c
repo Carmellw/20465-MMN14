@@ -48,9 +48,9 @@ enum status_code second_pass_file(const char *file_path, struct label *labels, i
     ent_file_path = get_new_path(file_path, NULL, "ent");
     ext_file_path = get_new_path(file_path, NULL, "ext");
 
-    ob_file = fopen(ob_file_path, "r");
-    ent_file = fopen(ent_file_path, "r");
-    ext_file = fopen(ext_file_path, "r");
+    ob_file = fopen(ob_file_path, "w");
+    ent_file = fopen(ent_file_path, "w");
+    ext_file = fopen(ext_file_path, "w");
 
     fprintf(ob_file, "% 7d %d\n", ic - 100, dc);
 
@@ -66,7 +66,7 @@ enum status_code second_pass_file(const char *file_path, struct label *labels, i
     fclose(ent_file);
     fclose(ext_file);
 
-    printf("Created files p %s %s %s\n", ob_file_path, ent_file_path, ext_file_path);
+    printf("Created files %s %s %s\n", ob_file_path, ent_file_path, ext_file_path);
 
     free(ob_file_path);
     free(ent_file_path);
