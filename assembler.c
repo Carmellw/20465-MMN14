@@ -10,7 +10,7 @@
 int main(int argc, char** argv) {
     char *result;
     struct label *labels = NULL;
-    struct entry *entries = NULL;
+    struct extern_struct *entries = NULL;
     int ic = 100;
     int dc = 0;
 

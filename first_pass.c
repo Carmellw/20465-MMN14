@@ -6,18 +6,18 @@
 #include "first_pass.h"
 #include "label_linked_list.h"
 #include "label.h"
-#include "entry.h"
+#include "extern_struct.h"
 #include "entry_linked_list.h"
 #include "line_utils.h"
 
-void first_pass_file(const char* file_path, struct label **labels, struct entry **entries, int *ic, int *dc) {
+void first_pass_file(const char* file_path, struct label **labels, struct extern_struct **entries, int *ic, int *dc) {
     FILE *fp = fopen(file_path, "r");
     FILE *fp2 = fopen("/Users/carmellwasserman/Desktop/example4.txt", "w");
     char line[MAX_LINE_LEN];
     struct label *first_label = NULL;
     struct label *current_label = NULL;
-    struct entry *first_entry = NULL;
-    struct entry *current_entry = NULL;
+    struct extern_struct *first_entry = NULL;
+    struct extern_struct *current_entry = NULL;
     *ic = 100;
     *dc = 0;
     int address_counter = 100;
@@ -39,7 +39,7 @@ void first_pass_file(const char* file_path, struct label **labels, struct entry 
     fclose(fp2);
 }
 
-void handle_line(const char* line, FILE* file_to_write, struct label **current_label, struct entry **current_entry, int *ic, int *dc, int* address_counter) {
+void handle_line(const char* line, FILE* file_to_write, struct label **current_label, struct extern_struct **current_entry, int *ic, int *dc, int* address_counter) {
     const char label[MAX_LABEL_LEN];
     enum line_type line_type;
     int is_label_exist;
@@ -80,9 +80,9 @@ void handle_line(const char* line, FILE* file_to_write, struct label **current_l
             break;
         case ENTRY:
             if (is_label_exist) {
-                add_entry(label, current_entry);
-                if ((*current_entry)->next_entry != NULL) {
-                    *current_entry = (*current_entry)->next_entry;
+                add_extern(label, current_entry);
+                if ((*current_entry)->next_extern != NULL) {
+                    *current_entry = (*current_entry)->next_extern;
                 }
             }
             break;

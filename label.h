@@ -16,4 +16,8 @@ struct label{
     struct label *next_label;
 };
 
+enum data_type {
+    DEFAULT,
+    STRING
+};
 #endif // LABEL_H

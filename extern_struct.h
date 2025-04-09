@@ -7,9 +7,9 @@
 
 #include "consts.h"
 
-struct entry{
+struct extern_struct{
     char name[MAX_LABEL_LEN];
-    struct entry *next_entry;
+    struct extern_struct *next_extern;
 };
 
 #endif //ENTRY_H

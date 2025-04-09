@@ -13,6 +13,10 @@ int get_line_type(const char *line, enum line_type *type);
 
 int is_instruction(const char *word);
 
+int is_data_instruction(const char *word);
+
+enum status_code get_data_type(const char *word, enum data_type *type);
+
 char *trim_whitespaces_from_start(const char *line);
 
 int is_register(const char *str);

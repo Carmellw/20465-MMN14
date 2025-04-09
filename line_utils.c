@@ -5,6 +5,7 @@
 #include "label.h"
 #include "line_utils.h"
 #include "intstruction.h"
+#include "status_codes.h"
 
 int get_label_name_if_exist(const char* line, const enum line_type type, char* label_name) {
     char temp_line[MAX_LINE_LEN];
@@ -80,7 +81,7 @@ int get_line_type(const char *line, enum line_type *type) {
     if (word == NULL || is_instruction(word)) {
         *type = CODE;
     }
-    else if (strncmp(word, ".data", 5) == 0 || strncmp(word, ".string", 7) == 0) {
+    else if (is_data_instruction(word)) {
         *type = DATA;
     }
     else if (strncmp(word, ".extern", 7) == 0) {
@@ -106,6 +107,25 @@ int is_instruction(const char *word) {
     }
 
     return FALSE;
+}
+
+int is_data_instruction(const char *word) {
+    if ((strncmp(word, ".data", 5) == 0 && word[5] == '\0') || (strncmp(word, ".string", 7) == 0 && word[7] == '\0')) {
+        return TRUE;
+    }
+    return FALSE;
+}
+
+enum status_code get_data_type(const char *word, enum data_type *type) {
+    if (strncmp(word, ".data", 5) == 0 && word[5] == '\0') {
+        *type = DEFAULT;
+        return SUCCESS;
+    }
+    if (strncmp(word, ".string", 7) == 0 && word[7] == '\0') {
+        *type = STRING;
+        return SUCCESS;
+    }
+    return DATA_TYPE_NOT_FOUND;
 }
 
 char *trim_whitespaces_from_start(const char *line) {
