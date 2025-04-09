@@ -21,10 +21,11 @@ enum status_code first_pass_file(const char *file_path, struct label **labels, i
     char line[MAX_LINE_LEN];
     struct label *first_label = NULL;
     struct label *current_label = NULL;
-    *ic = 100;
-    *dc = 0;
     int address_counter = 100;
     enum status_code status_code;
+
+    *ic = 100;
+    *dc = 0;
 
     if (read_file == NULL) {
         fprintf(stderr, "Error opening file %s\n", file_path);

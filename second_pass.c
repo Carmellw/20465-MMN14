@@ -418,7 +418,7 @@ enum status_code get_operand_value(const char *operand, const enum addressing_ty
             if (status_code != SUCCESS) {
                 return status_code;
             }
-            *value |= (label.address - command_address & 0x1FFFFF) << 3;
+            *value |= ((label.address - command_address) & 0x1FFFFF) << 3;
             *value |= 1 << 2;
             *value |= 0 << 1;
             *value |= 0;
