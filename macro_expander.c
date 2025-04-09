@@ -19,10 +19,11 @@ void remove_whitespaces_from_string(const char *str, char **result);
 
 int compare_strings_until_null_terminator(const char *str1, const char *str2);
 
-enum status_code expand_macros(const char *file_path, const char **result_file_path) {
+enum status_code expand_macros(const char *file_path, char **result_file_path) {
     FILE *read_file;
     FILE *write_file;
     char *temp_file_path;
+    char *am_file_path;
     struct macro *first_macro = NULL;
 
     read_file = fopen(file_path, "r");
@@ -34,6 +35,7 @@ enum status_code expand_macros(const char *file_path, const char **result_file_p
     write_file = fopen(temp_file_path, "w");
     if (write_file == NULL) {
         fprintf(stderr, "Error opening file %s\n", temp_file_path);
+        free(temp_file_path);
         return FAILED_OPENING_FILE;
     }
 
@@ -45,13 +47,17 @@ enum status_code expand_macros(const char *file_path, const char **result_file_p
     read_file = fopen(temp_file_path, "r");
     if (read_file == NULL) {
         fprintf(stderr, "Error opening file %s\n", temp_file_path);
+        free(temp_file_path);
         return FAILED_OPENING_FILE;
     }
-    free(temp_file_path);
-    temp_file_path = get_new_path(file_path, NULL, "am");
-    write_file = fopen(temp_file_path, "w");
+
+    am_file_path = get_new_path(file_path, NULL, "am");
+    write_file = fopen(am_file_path, "w");
     if (write_file == NULL) {
         fprintf(stderr, "Error opening file %s\n", temp_file_path);
+        remove(temp_file_path);
+        free(temp_file_path);
+        free(am_file_path);
         return FAILED_OPENING_FILE;
     }
 
@@ -60,7 +66,9 @@ enum status_code expand_macros(const char *file_path, const char **result_file_p
     fclose(read_file);
     fclose(write_file);
 
-    *result_file_path = temp_file_path;
+    remove(temp_file_path);
+    free(temp_file_path);
+    *result_file_path = am_file_path;
 
     free_macros(first_macro);
 

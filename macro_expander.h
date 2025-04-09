@@ -4,6 +4,6 @@
 #include "macro_expander.h"
 #include "status_codes.h"
 
-enum status_code expand_macros(const char *file_path, const char **result_file_path);
+enum status_code expand_macros(const char *file_path, char **result_file_path);
 
 #endif

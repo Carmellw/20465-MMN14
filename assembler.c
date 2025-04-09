@@ -8,7 +8,7 @@
 #include "label_linked_list.h"
 
 int main(const int argc, char **argv) {
-    char *result;
+    char *result = NULL;
     struct label *labels = NULL;
     int ic = 100;
     int dc = 0;
@@ -16,6 +16,7 @@ int main(const int argc, char **argv) {
     int i;
 
     for (i = 1; i < argc; i++) {
+        printf("processing file \"%s\"\n", argv[i]);
         status_code = expand_macros(argv[i], &result);
         if (status_code != SUCCESS) {
             fprintf(stderr, "Error expanding macros for file %s, moving to next file...\n", argv[i]);
@@ -30,10 +31,15 @@ int main(const int argc, char **argv) {
         if (status_code != SUCCESS) {
             fprintf(stderr, "Error at second pass for file %s\n", argv[i]);
         }
-    }
 
-    free(result);
-    free_labels(labels);
+        if (result != NULL) {
+            free(result);
+        }
+        free_labels(labels);
+
+        ic = 100;
+        dc = 0;
+    }
 
     return SUCCESS;
 }
