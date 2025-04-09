@@ -132,3 +132,38 @@ void trim_whitespaces_from_start(const char *line) {
 int is_register(const char *str) {
     return str[0] == 'r' && str[1] >= '0' && str[1] <= '7' && (str[2] == '\0' || str[2] == '\n' || str[2] == ' ');
 }
+
+int is_number(const char *str) {
+    int i = 0;
+
+    if (str[0] == '\0') {
+        return FALSE;
+    }
+    if (str[0] == '-') {
+        i++;
+    }
+
+    while (str[i] != '\0') {
+        if (!isdigit(str[i])) {
+            return FALSE;
+        }
+        i++;
+    }
+    return TRUE;
+}
+
+int is_legal_label(const char *label) {
+    int i = 0;
+
+    if (label[0] == '\0') {
+        return FALSE;
+    }
+    while (label[i] != '\0') {
+        if (!isalpha(label[i]) || isdigit(label[i])) {
+            return FALSE;
+        }
+        i++;
+    }
+    return TRUE;
+}
+

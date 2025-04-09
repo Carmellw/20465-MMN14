@@ -10,8 +10,9 @@
 #include "path_utils.h"
 #include "label_linked_list.h"
 
-void handle_line2(const char *line, FILE *file_to_write, FILE *entry_file, FILE *extern_file, struct label *labels,
-                  int *ic, int *dc);
+enum status_code handle_line2(const char *line, FILE *file_to_write, FILE *entry_file, FILE *extern_file,
+                              struct label *labels,
+                              int *ic);
 
 enum status_code handle_code_line(const char *line, FILE *file_to_write, FILE *extern_file, struct label *labels,
                                   int *ic);
@@ -33,7 +34,7 @@ enum addressing_type get_addressing_type(const char *operand);
 enum status_code get_operand_value(const char *operand, enum addressing_type addressing_type, struct label *labels,
                                    int command_address, int *value, int *is_extern);
 
-enum status_code second_pass_file(const char *file_path, struct label *labels, int ic, int dc) {
+enum status_code second_pass_file(const char *file_path, struct label *labels, int ic, const int dc) {
     FILE *read_file = fopen(file_path, "r");
     FILE *ob_file;
     FILE *ent_file;
@@ -54,10 +55,9 @@ enum status_code second_pass_file(const char *file_path, struct label *labels, i
     fprintf(ob_file, "% 7d %d\n", ic - 100, dc);
 
     ic = 100;
-    dc = 0;
 
     while (fgets(line, MAX_LINE_LEN, read_file)) {
-        handle_line2(line, ob_file, ent_file, ext_file, labels, &ic, &dc);
+        handle_line2(line, ob_file, ent_file, ext_file, labels, &ic);
     }
 
     fclose(read_file);
@@ -74,28 +74,41 @@ enum status_code second_pass_file(const char *file_path, struct label *labels, i
     return SUCCESS;
 }
 
-void handle_line2(const char *line, FILE *file_to_write, FILE *entry_file, FILE *extern_file, struct label *labels,
-                  int *ic, int *dc) {
+enum status_code handle_line2(const char *line, FILE *file_to_write, FILE *entry_file, FILE *extern_file,
+                              struct label *labels,
+                              int *ic) {
     enum line_type label_type;
+    enum status_code status_code;
     if (line[0] == '\0' || line[0] == '\n' || line[0] == ';') {
-        return;
+        return SUCCESS;
     }
 
     get_line_type(line, &label_type);
 
     switch (label_type) {
         case CODE:
-            handle_code_line(line, file_to_write, extern_file, labels, ic);
+            status_code = handle_code_line(line, file_to_write, extern_file, labels, ic);
+            if (status_code != SUCCESS) {
+                return status_code;
+            }
             break;
         case ENTRY:
-            handle_entry_line(line, entry_file, labels);
+            status_code = handle_entry_line(line, entry_file, labels);
+            if (status_code != SUCCESS) {
+                return status_code;
+            }
             break;
         case DATA:
-            handle_data_line(line, file_to_write, ic);
+            status_code = handle_data_line(line, file_to_write, ic);
+            if (status_code != SUCCESS) {
+                return status_code;
+            }
             break;
         case EXTERN:
             break;
     }
+
+    return SUCCESS;
 }
 
 enum status_code handle_code_line(const char *line, FILE *file_to_write, FILE *extern_file, struct label *labels,
@@ -284,6 +297,10 @@ enum status_code convert_code_line_to_binary(const char *instruction, const char
 
     if (src_operand != NULL) {
         src_addressing_type = get_addressing_type(src_operand);
+        if (src_addressing_type == ILLEGAL) {
+            fprintf(stderr, "operand \"%s\" is illegal (skipping line)\n", src_operand);
+            return ILLEGAL_OPERAND;
+        }
         if (src_addressing_type == REGISTER) {
             src_reg = src_operand[1] - 48;
         }
@@ -291,6 +308,10 @@ enum status_code convert_code_line_to_binary(const char *instruction, const char
 
     if (dst_operand != NULL) {
         dst_addressing_type = get_addressing_type(dst_operand);
+        if (dst_addressing_type == ILLEGAL) {
+            fprintf(stderr, "operand \"%s\" is illegal (skipping line)\n", dst_operand);
+            return ILLEGAL_OPERAND;
+        }
         if (dst_addressing_type == REGISTER) {
             dst_reg = (int) dst_operand[1];
         }
@@ -323,15 +344,19 @@ enum status_code get_instruction(const char *name, struct instruction *instructi
 
 enum addressing_type get_addressing_type(const char *operand) {
     if (operand[0] == '#') {
-        return IMMEDIATE;
-    }
-    if (operand[0] == '&') {
-        return RELATIVE;
-    }
-    if (is_register(operand)) {
+        if (is_all_digits(operand + 1)) {
+            return IMMEDIATE;
+        }
+    } else if (operand[0] == '&') {
+        if (is_legal_label(operand + 1)) {
+            return RELATIVE;
+        }
+    } else if (is_register(operand)) {
         return REGISTER;
+    } else if (is_legal_label(operand)) {
+        return DIRECT;
     }
-    return DIRECT;
+    return ILLEGAL;
 }
 
 enum status_code get_operand_value(const char *operand, enum addressing_type addressing_type, struct label *labels,
@@ -393,8 +418,10 @@ enum status_code get_operand_value(const char *operand, enum addressing_type add
             if (label.type == EXTERN) {
                 *is_extern = TRUE;
             }
-
             return SUCCESS;
+        case ILLEGAL:
+            fprintf(stderr, "operand \"%s\" is illegal (skipping line)\n", operand);
+            return ILLEGAL_OPERAND;
     }
     return UNKNOWN_ERROR;
 }

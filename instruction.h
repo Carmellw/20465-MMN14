@@ -11,7 +11,8 @@ enum addressing_type {
     IMMEDIATE,
     DIRECT,
     RELATIVE,
-    REGISTER
+    REGISTER,
+    ILLEGAL
 };
 
 extern struct instruction instructions[];
